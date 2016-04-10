@@ -51,15 +51,15 @@ public class App {
 	
 
 	public static void main(String[] args) {
-		CanvasPanel canvasPanel1 = createCanvasPanel(new ScreenCoordSystem());
-		CanvasPanel canvasPanel2 = createCanvasPanel(new CartesianCoordSystem());
-		
 		JPanel canvasPanel = new JPanel(new GridLayout(1, 2));
-		canvasPanel.add(canvasPanel1);
-		canvasPanel.add(canvasPanel2);
-		
 		JPanel controlPanel = new JPanel(new GridLayout(1, 2));
+		
+		CanvasPanel canvasPanel1 = createCanvasPanel(new ScreenCoordSystem());
+		canvasPanel.add(canvasPanel1);
 		controlPanel.add(new ControlPanel(canvasPanel1));
+		
+		CanvasPanel canvasPanel2 = createCanvasPanel(new CartesianCoordSystem());
+		canvasPanel.add(canvasPanel2);
 		controlPanel.add(new ControlPanel(canvasPanel2));
 		
 		JPanel panel = new JPanel(new BorderLayout());
@@ -76,7 +76,8 @@ public class App {
 		
 //		canvas.fitEditor();
 //		canvas.resizeCanvasToEditor();
-//		canvas.zoomFitCanvas();
+		canvasPanel1.getCanvas().zoomFitCanvas();
+		canvasPanel2.getCanvas().zoomFitCanvas();
 	}
 
 }

@@ -1,17 +1,19 @@
 package hgm.gef.editor;
 
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import hgm.gef.Paintable;
 import hgm.gef.canvas.Canvas;
+import hgm.gef.fig.Bounded;
+import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
 import hgm.gef.layer.Layer;
 import hgm.gef.util.GEFUtil;
 
-public class LayerManager implements Paintable {
+public class LayerManager implements Bounded, Paintable {
 
 	private Canvas canvas;
 	
@@ -91,8 +93,8 @@ public class LayerManager implements Paintable {
 		canvas.repaint();
 	}
 
-	public void repaint(Rectangle2D mr) {
-		canvas.repaint(mr);
+	public void repaint(Bounds mb) {
+		canvas.repaint(mb);
 	}
 	
 	@Override
@@ -102,8 +104,12 @@ public class LayerManager implements Paintable {
 		}
 	}
 
-	public Rectangle2D getBounds() {
-		return GEFUtil.addBounds(layers);
+	public Point2D getCorner1() {
+		return GEFUtil.getMinCorner(layers);
+	}
+	
+	public Point2D getCorner2() {
+		return GEFUtil.getMaxCorner(layers);
 	}
 
 }

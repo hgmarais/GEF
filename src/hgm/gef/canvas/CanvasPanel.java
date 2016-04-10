@@ -15,7 +15,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JPanel;
@@ -24,6 +23,7 @@ import javax.swing.JScrollBar;
 import hgm.gef.BasicStyle;
 import hgm.gef.Style;
 import hgm.gef.editor.LayerManagerListener;
+import hgm.gef.fig.Bounds;
 import hgm.gef.layer.Layer;
 
 public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, AdjustmentListener {
@@ -31,7 +31,7 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	/***/
 	private static final long serialVersionUID = 1L;
 	
-	private ViewportView panel;
+	private ViewportPanel viewportPanel;
 	
 	private Style style;
 
@@ -43,12 +43,12 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	
 	private JPanel corner;
 
-	private class ViewportView extends JPanel {
+	private class ViewportPanel extends JPanel {
 		
 		/***/
 		private static final long serialVersionUID = 1L;
 
-		public ViewportView() {
+		public ViewportPanel() {
 			setOpaque(true);
 			setDoubleBuffered(true);
 		}
@@ -69,7 +69,7 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	public CanvasPanel(Canvas canvas) {
 		this.canvas = canvas;
 		this.style = new BasicStyle(new BasicStroke(1.0f), Color.WHITE, null);
-		panel = new ViewportView();
+		viewportPanel = new ViewportPanel();
 		
 		canvas.addListener(this);
 		canvas.getLayerManager().addListener(this);
@@ -83,13 +83,13 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		hPanel.add(corner, BorderLayout.EAST);
 		
 		setLayout(new BorderLayout());
-		add(panel, BorderLayout.CENTER);
+		add(viewportPanel, BorderLayout.CENTER);
 		add(hPanel, BorderLayout.SOUTH);
 		add(vBar, BorderLayout.EAST);
 		
-		panel.addMouseListener(this);
-		panel.addMouseWheelListener(this);
-		panel.addMouseMotionListener(this);
+		viewportPanel.addMouseListener(this);
+		viewportPanel.addMouseWheelListener(this);
+		viewportPanel.addMouseMotionListener(this);
 		hBar.addAdjustmentListener(this);
 		vBar.addAdjustmentListener(this);
 		addComponentListener(this);
@@ -97,18 +97,33 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		setBackground(Color.WHITE);
 	}
 	
+	public Canvas getCanvas() {
+		return canvas;
+	}
+	
+	public JPanel getViewportPanel() {
+		return viewportPanel;
+	}
+	
 	@Override
 	public void setBackground(Color bg) {
-		if (panel != null) {
-			panel.setBackground(bg);
+		if (viewportPanel != null) {
+			viewportPanel.setBackground(bg);
 		}
 		super.setBackground(bg);
 	}
 	
 	private void refreshVisibleSize() {
-		double w = canvas.getConverter().xPixelToModel(panel.getWidth());
-		double h = canvas.getConverter().yPixelToModel(panel.getHeight());
-		canvas.setVisibleSize(w, h);
+		canvas.setScreenSize(getWidth(), getHeight());
+//		double x1 = canvas.xScreenToModel(0);
+//		double y1 = canvas.yScreenToModel(0);
+//		double x2 = canvas.xScreenToModel(getWidth());
+//		double y2 = canvas.yScreenToModel(getHeight());
+//		double x1 = canvas.getConverter().xPixelToModel(0);
+//		double y1 = canvas.getConverter().yPixelToModel(0);
+//		double x2 = canvas.getConverter().xPixelToModel(viewportPanel.getWidth());
+//		double y2 = canvas.getConverter().yPixelToModel(viewportPanel.getHeight());
+//		canvas.setVisibleBounds(new Bounds(x1, y1, x2, y2));
 	}
 	
 	public void setStyle(Style style) {
@@ -135,8 +150,8 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	}
 
 	@Override
-	public void repaintRequested(Rectangle2D mr) {
-		// TODO : Limit to rectangle.
+	public void repaintRequested(Bounds mb) {
+		// TODO : Limit to bounds.
 		repaint();
 	}
 
@@ -164,11 +179,11 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 			double my = canvas.yScreenToModel(e.getY());
 			canvas.adjustZoomAround(-e.getPreciseWheelRotation(), mx, my);
 		} else if (e.isAltDown()) {
-			if (e.isShiftDown()) {
-				canvas.adjustDimension(-e.getPreciseWheelRotation(), 0.0);								
-			} else {
-				canvas.adjustDimension(0.0, -e.getPreciseWheelRotation());
-			}
+//			if (e.isShiftDown()) {
+//				canvas.adjustDimension(-e.getPreciseWheelRotation(), 0.0);
+//			} else {
+//				canvas.adjustDimension(0.0, -e.getPreciseWheelRotation());
+//			}
 		} else {
 			if (e.isShiftDown()) {
 				canvas.adjustOffset(e.getPreciseWheelRotation(), 0.0);
@@ -216,47 +231,57 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	
 	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e) {
-		canvas.setOffset(canvas.xPixelToModel(hBar.getValue()), canvas.yPixelToModel(vBar.getValue()));
+//		canvas.setOffset(canvas.xPixelToModel(hBar.getValue()), canvas.yPixelToModel(vBar.getValue()));
 	}
 	
 	private void refreshScrollBars() {
-		double pvx = canvas.xModelToPixel(canvas.getVisibleX());
-		double pvy = canvas.yModelToPixel(canvas.getVisibleY());
-		double pvw = canvas.xModelToPixel(canvas.getVisibleWidth());
-		double pvh = canvas.yModelToPixel(canvas.getVisibleHeight());
-		double pcw = canvas.xModelToPixel(canvas.getWidth());
-		double pch = canvas.xModelToPixel(canvas.getHeight());
+		Bounds mCanvasBounds = canvas.getBounds();
+		Bounds mVisibleBounds = canvas.getVisibleBounds();
 		
+		double pvx = canvas.xModelToPixel(mVisibleBounds.getMinX());
+		double pvy = canvas.yModelToPixel(mVisibleBounds.getMinY());
+		double pvw = canvas.xModelToPixel(mVisibleBounds.getWidth());
+		double pvh = canvas.yModelToPixel(mVisibleBounds.getHeight());
+		double pcx = canvas.xModelToPixel(mCanvasBounds.getMinX());
+		double pcy = canvas.yModelToPixel(mCanvasBounds.getMinY());
+		double pcw = canvas.xModelToPixel(mCanvasBounds.getWidth());
+		double pch = canvas.yModelToPixel(mCanvasBounds.getHeight());
+		
+		double hMin = Math.min(pcx, pvx);
+		double vMin = Math.min(pcy, pvy);
 		double hMax = Math.max(pcw, pvx + pvw);
 		double vMax = Math.max(pch, pvy + pvh);
-
-		DefaultBoundedRangeModel hModel = new DefaultBoundedRangeModel((int)pvx, (int)pvw, 0, (int)(hMax));
-		DefaultBoundedRangeModel vModel = new DefaultBoundedRangeModel((int)pvy, (int)pvh, 0, (int)(vMax));
 		
-		hBar.setModel(hModel);
-		vBar.setModel(vModel);
+//		System.out.println((int)pvx+" "+(int)pvw+" "+(int)pcw+" "+(int)hMin+" "+(int)hMax);
+//		System.out.println("pvy:"+(int)pvy+" pvh:"+(int)pvh+" pch:"+(int)pch+" vMin:"+(int)vMin+" vMax:"+vMax);
+//		
+//		DefaultBoundedRangeModel hModel = new DefaultBoundedRangeModel((int)pvx, (int)pvw, (int)hMin, (int)(hMax));
+//		DefaultBoundedRangeModel vModel = new DefaultBoundedRangeModel((int)pvy, (int)pvh, (int)vMin, (int)(vMax));
+//		
+//		hBar.setModel(hModel);
+//		vBar.setModel(vModel);
+//		
+//		boolean hVisible = hModel.getExtent() < hModel.getMaximum();
+//		boolean vVisible = vModel.getExtent() < vModel.getMaximum();
 		
-		boolean hVisible = hModel.getExtent() < hModel.getMaximum();
-		boolean vVisible = vModel.getExtent() < vModel.getMaximum();
+//		hBar.setVisible(hVisible);
+//		vBar.setVisible(vVisible);
 		
-		hBar.setVisible(hVisible);
-		vBar.setVisible(vVisible);
-		
-		corner.setPreferredSize(new Dimension(hBar.getHeight(), vBar.getWidth()));
-		corner.setVisible(hVisible && vVisible);
-		
-		hBar.repaint();
-		vBar.repaint();
+//		corner.setPreferredSize(new Dimension(hBar.getHeight(), vBar.getWidth()));
+//		corner.setVisible(hVisible && vVisible);
+//		
+//		hBar.repaint();
+//		vBar.repaint();
 	}
 
 	@Override
-	public void boundsChanged(Rectangle2D mCanvasBounds) {
+	public void boundsChanged() {
 		refreshScrollBars();
 		repaint();
 	}
 
 	@Override
-	public void zoomChanged(double zoom) {
+	public void zoomChanged() {
 		refreshVisibleSize();
 		repaint();
 	}

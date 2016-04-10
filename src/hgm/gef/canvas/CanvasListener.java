@@ -1,17 +1,17 @@
 package hgm.gef.canvas;
 
-import java.awt.geom.Rectangle2D;
+import hgm.gef.fig.Bounds;
 
 public interface CanvasListener {
 	
-	void boundsChanged(Rectangle2D mCanvasBounds);
+	void boundsChanged();
 
-	void zoomChanged(double zoom);
+	void zoomChanged();
 
 	void visibleBoundsChanged();
 
 	void repaintRequested();
 
-	void repaintRequested(Rectangle2D mr);
+	void repaintRequested(Bounds mb);
 
 }

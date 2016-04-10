@@ -1,11 +1,11 @@
 package hgm.gef.selection;
 
 import java.awt.Color;
-import java.awt.geom.Rectangle2D;
 
 import hgm.gef.BasicStyle;
 import hgm.gef.Style;
 import hgm.gef.editor.Painter;
+import hgm.gef.fig.Bounds;
 import hgm.gef.fig.Fig;
 
 public class DefaultSelectable implements Selectable {
@@ -49,7 +49,7 @@ public class DefaultSelectable implements Selectable {
 	}
 
 	@Override
-	public Rectangle2D getBounds() {
+	public Bounds getBounds() {
 		return figure.getBounds();
 	}
 

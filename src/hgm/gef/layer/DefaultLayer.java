@@ -1,12 +1,12 @@
 package hgm.gef.layer;
 
-import java.awt.geom.Rectangle2D;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import hgm.gef.editor.LayerManager;
 import hgm.gef.editor.Painter;
+import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
 import hgm.gef.util.GEFUtil;
 
@@ -96,14 +96,14 @@ public class DefaultLayer implements Layer {
 	}
 
 	@Override
-	public void repaint(Rectangle2D mr) {
+	public void repaint(Bounds mb) {
 		if (editor != null) {
-			editor.repaint(mr);
+			editor.repaint(mb);
 		}
 	}
 	
 	@Override
-	public Rectangle2D getBounds() {
+	public Bounds getBounds() {
 		return GEFUtil.addBounds(figures);
 	}
 

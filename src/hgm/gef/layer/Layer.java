@@ -1,11 +1,11 @@
 package hgm.gef.layer;
 
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import hgm.gef.Paintable;
 import hgm.gef.editor.LayerManager;
 import hgm.gef.fig.Bounded;
+import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
 
 public interface Layer extends Paintable, Bounded {
@@ -26,8 +26,6 @@ public interface Layer extends Paintable, Bounded {
 	
 	void removeListener(LayerListener listener);
 	
-	void repaint(Rectangle2D mr);
-
-	Rectangle2D getBounds();
+	void repaint(Bounds mb);
 
 }

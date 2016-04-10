@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import hgm.gef.Style;
 import hgm.gef.canvas.Canvas;
 import hgm.gef.canvas.XYCanvasConverter;
+import hgm.gef.fig.Bounds;
 
 public class Painter {
 	
@@ -22,7 +23,17 @@ public class Painter {
 		this.canvas = canvas;
 		this.g = g;
 		pushStyle(style);
-		canvas.getConverter().apply(g);
+		apply(g);
+	}
+	
+	private void apply(Graphics2D g) {
+		double zoom = canvas.getZoom();
+		CoordSystem coordSystem = canvas.getCoordSystem();
+		double xScale = (double)coordSystem.getXDirection() * zoom;
+		double yScale = (double)coordSystem.getYDirection() * zoom;
+
+		g.scale(xScale, yScale);
+		g.translate(-canvas.getLeft(), -canvas.getTop());
 	}
 	
 	public XYCanvasConverter getConverter() {
@@ -65,6 +76,10 @@ public class Painter {
 			g.setColor(topStyle.getStrokeColor());
 			g.draw(shape);
 		}
+	}
+	
+	public void paint(Bounds bounds) {
+		
 	}
 	
 }

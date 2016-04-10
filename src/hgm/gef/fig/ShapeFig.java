@@ -1,7 +1,6 @@
 package hgm.gef.fig;
 
 import java.awt.Shape;
-import java.awt.geom.Rectangle2D;
 
 import hgm.gef.editor.Painter;
 
@@ -44,12 +43,12 @@ public class ShapeFig extends LayerFig {
 	}
 
 	@Override
-	public Rectangle2D getBounds() {
+	public Bounds getBounds() {
 		if (shape == null) {
 			return null;
 		}
 		
-		return shape.getBounds2D();
+		return new Bounds(shape.getBounds2D());
 	}
 
 }

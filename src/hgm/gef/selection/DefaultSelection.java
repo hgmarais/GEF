@@ -1,6 +1,7 @@
 package hgm.gef.selection;
 
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 
 import hgm.gef.BasicStyle;
 import hgm.gef.Style;
@@ -9,7 +10,7 @@ import hgm.gef.fig.Fig;
 
 public class DefaultSelection implements Selection {
 	
-	public static final Style STYLE = BasicStyle.dashedLine(false, Color.ORANGE);
+	public static final Style STYLE = BasicStyle.dashedLine(false, Color.RED);
 
 	private SelectionManager selectionManager;
 	
@@ -37,8 +38,18 @@ public class DefaultSelection implements Selection {
 	@Override
 	public void paint(Painter p) {
 		p.pushStyle(STYLE);
-		p.paint(figure.getBounds());
+		p.paint(getBounds());
 		p.popStyle();
+	}
+
+	@Override
+	public boolean contains(double mx, double my) {
+		return figure.contains(mx, my);
+	}
+
+	@Override
+	public Rectangle2D getBounds() {
+		return figure.getBounds();
 	}
 
 }

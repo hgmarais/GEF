@@ -145,14 +145,16 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		double my = canvas.yScreenToModel(sy);
 		canvas.getSelectionManager().refreshSelectables(mx, my);
 	}
-
-	@Override
-	public void mouseDragged(MouseEvent e) {
+	
+	private void select(boolean toggle, int sx, int sy) {
+		double mx = canvas.xScreenToModel(sx);
+		double my = canvas.yScreenToModel(sy);
+		canvas.getSelectionManager().select(toggle, mx, my);
+		refreshSelectables(sx, sy);
 	}
 
 	@Override
-	public void mouseMoved(MouseEvent e) {
-		refreshSelectables(e.getX(), e.getY());
+	public void mouseDragged(MouseEvent e) {
 	}
 
 	@Override
@@ -188,8 +190,14 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		select(e.isControlDown(), e.getX(), e.getY());
 	}
 
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		refreshSelectables(e.getX(), e.getY());
+	}
+	
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		refreshSelectables(e.getX(), e.getY());

@@ -10,7 +10,7 @@ import hgm.gef.fig.Fig;
 
 public class DefaultSelectable implements Selectable {
 	
-	public static final Style STYLE = BasicStyle.dashedLine(false, Color.RED);
+	public static final Style STYLE = BasicStyle.dashedLine(false, Color.BLUE);
 	
 	private SelectionManager selectionManager;
 	

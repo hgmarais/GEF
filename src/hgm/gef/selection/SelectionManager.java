@@ -3,7 +3,6 @@ package hgm.gef.selection;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import hgm.gef.Paintable;
 import hgm.gef.canvas.Canvas;
@@ -27,10 +26,49 @@ public class SelectionManager implements Paintable {
 		layerManager = canvas.getLayerManager();
 	}
 	
+	private void addSelection(Selection selection) {
+		selections.add(selection);
+		canvas.repaint(selection.getBounds());
+	}
+	
+	private void removeSelection(Selection selection) {
+		if (selections.remove(selection)) {
+			canvas.repaint(selection.getBounds());
+		}
+	}
+	
+	private void clearSelections() {
+		selections.clear();
+		canvas.repaint();
+	}
+	
 	public void refreshSelectables(double mx, double my) {
 		List<LayerFig> figures = layerManager.getLayerFigures(mx, my);
-		selectables = figures.stream().map(figure -> new DefaultSelectable(this, figure)).collect(Collectors.toList());
+		selectables.clear();
+		
+		for (LayerFig figure : figures) {
+			if (isSelected(figure)) {
+				continue;
+			}
+			
+			selectables.add(new DefaultSelectable(this, figure));
+		}
+		
 		canvas.repaint(GEFUtil.addBounds(selectables));
+	}
+
+	private boolean isSelected(LayerFig figure) {
+		return getSelection(figure) != null;
+	}
+
+	private Selection getSelection(LayerFig figure) {
+		for (Selection selection : selections) {
+			if (selection.getFigure() == figure) {
+				return selection;
+			}
+		}
+		
+		return null;
 	}
 
 	public void clearSelectables() {
@@ -46,6 +84,48 @@ public class SelectionManager implements Paintable {
 		
 		for (Selectable selectable : selectables) {
 			selectable.paint(p);
+		}
+	}
+
+	public void select(boolean toggle, double mx, double my) {
+		Selectable targetSelectable = null;
+		
+		for (Selectable selectable : selectables) {
+			if (selectable.contains(mx, my)) {
+				targetSelectable = selectable;
+				break;
+			}
+		}
+		
+		if (targetSelectable != null) {
+			if (!toggle) {
+				clearSelections();
+			}
+			
+			selectables.remove(targetSelectable);
+			addSelection(targetSelectable.createSelection());
+			return;
+		}
+		
+		Selection targetSelection = null;
+		
+		for (Selection selection : selections) {
+			if (selection.contains(mx, my)) {
+				targetSelection = selection;
+				break;
+			}
+		}
+		
+		if (toggle) {
+			if (targetSelection != null) {
+				removeSelection(targetSelection);
+			}
+		} else {
+			clearSelections();
+			
+			if (targetSelection != null) {
+				addSelection(targetSelection);
+			}
 		}
 	}
 

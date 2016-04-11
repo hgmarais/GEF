@@ -8,6 +8,7 @@ import java.awt.geom.Line2D;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import hgm.gef.BasicStyle;
 import hgm.gef.canvas.Canvas;
@@ -48,7 +49,6 @@ public class App {
 		
 		return new CanvasPanel(canvas);
 	}
-	
 
 	public static void main(String[] args) {
 		JPanel canvasPanel = new JPanel(new GridLayout(1, 2));
@@ -74,8 +74,12 @@ public class App {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		
-		canvasPanel1.getCanvas().zoomFitCanvas();
-		canvasPanel2.getCanvas().zoomFitCanvas();
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				canvasPanel1.getCanvas().zoomFitCanvas();
+				canvasPanel2.getCanvas().zoomFitCanvas();		
+			}
+		});
 	}
 
 }

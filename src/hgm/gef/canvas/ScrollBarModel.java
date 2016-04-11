@@ -66,7 +66,7 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 			hValue = hMax - hValue + hMin - hExtent;
 		}
 		
-		refresh(hMin, hMax, hValue, hExtent, canvasPanel.getViewportPanel().getWidth());
+		refresh(hMin, hMax, hValue, hExtent, canvas.getScreenWidth());
 	}
 	
 	private void refreshVertical() {
@@ -97,7 +97,7 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 			vValue = vMax - vValue + vMin - vExtent;
 		}
 		
-		refresh(vMin, vMax, vValue, vExtent, canvasPanel.getViewportPanel().getHeight());
+		refresh(vMin, vMax, vValue, vExtent, canvas.getScreenHeight());
 	}
 	
 	private void refresh(double min, double max, double value, double extent, int size) {
@@ -182,10 +182,10 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 		double pvy = canvas.yModelToScreen(mVisibleBounds.getMinY());
 		double pvh = canvas.hModelToScreen(mVisibleBounds.getHeight());
 		double pcy = canvas.yModelToScreen(mCanvasBounds.getMinY());
-		double pch = canvas.wModelToScreen(mCanvasBounds.getHeight());
+		double pch = canvas.hModelToScreen(mCanvasBounds.getHeight());
 		
-		pvy = coordSystem.horizontal(pvy);
-		pcy = coordSystem.horizontal(pcy);
+		pvy = coordSystem.vertical(pvy);
+		pcy = coordSystem.vertical(pcy);
 		
 		double hMin = Math.min(pvy, pcy);
 		double hMax = Math.max(pcy + pch, pvy + pvh);
@@ -193,7 +193,7 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 
 		double newValue = hMin + (percentage * diff);
 		newValue = canvas.wScreenToModel(newValue);
-		newValue = coordSystem.horizontal(newValue);
+		newValue = coordSystem.vertical(newValue);
 		
 		canvas.adjustOffset(0.0, newValue);		
 	}

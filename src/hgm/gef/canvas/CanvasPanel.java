@@ -88,6 +88,10 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		vBar = new JScrollBar(JScrollBar.VERTICAL);
 		corner = new JPanel();
 		
+		hBar.setVisible(false);
+		vBar.setVisible(false);
+		corner.setVisible(false);
+		
 		hBarModel = new ScrollBarModel(this, true);
 		vBarModel = new ScrollBarModel(this, false);
 		hBar.setModel(hBarModel);

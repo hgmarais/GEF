@@ -201,6 +201,10 @@ public class Canvas {
 		return m * xScreenPerModel();
 	}
 	
+	public double wScreenToModel(double s) {
+		return s * xModelPerScreen();
+	}
+	
 	public double hModelToScreen(double m) {
 		return m * yScreenPerModel();
 	}

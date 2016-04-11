@@ -16,14 +16,11 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-import javax.swing.BoundedRangeModel;
-import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 
 import hgm.gef.BasicStyle;
 import hgm.gef.Style;
-import hgm.gef.editor.CoordSystem;
 import hgm.gef.editor.LayerManagerListener;
 import hgm.gef.fig.Bounds;
 import hgm.gef.layer.Layer;
@@ -42,6 +39,10 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	private JScrollBar hBar;
 
 	private JScrollBar vBar;
+	
+	private ScrollBarModel hBarModel;
+	
+	private ScrollBarModel vBarModel;
 	
 	private JPanel corner;
 
@@ -71,15 +72,47 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	public CanvasPanel(Canvas canvas) {
 		this.canvas = canvas;
 		this.style = new BasicStyle(new BasicStroke(1.0f), Color.WHITE, null);
-		viewportPanel = new ViewportPanel();
+		
+		createComponents();
+		layoutComponents();
 		
 		canvas.addListener(this);
 		canvas.getLayerManager().addListener(this);
-
-		hBar = new JScrollBar(JScrollBar.HORIZONTAL, 0, 0, 0, 0);
-		vBar = new JScrollBar(JScrollBar.VERTICAL, 0, 0, 0, 0);
+		addComponentListener(this);
+		setBackground(Color.WHITE);
+	}
+	
+	private void createComponents() {
+		viewportPanel = new ViewportPanel();
+		hBar = new JScrollBar(JScrollBar.HORIZONTAL);
+		vBar = new JScrollBar(JScrollBar.VERTICAL);
 		corner = new JPanel();
 		
+		hBarModel = new ScrollBarModel(this, true);
+		vBarModel = new ScrollBarModel(this, false);
+		hBar.setModel(hBarModel);
+		vBar.setModel(vBarModel);
+		
+		hBar.addAdjustmentListener(new AdjustmentListener() {
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				hBarModel.applyToCanvas();
+			}
+		});
+		
+		vBar.addAdjustmentListener(new AdjustmentListener() {
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				vBarModel.applyToCanvas();
+			}
+		});
+		
+		viewportPanel.addMouseListener(this);
+		viewportPanel.addMouseWheelListener(this);
+		viewportPanel.addMouseMotionListener(this);
+	}
+
+	private void layoutComponents() {
 		JPanel hPanel = new JPanel(new BorderLayout());
 		hPanel.add(hBar, BorderLayout.CENTER);
 		hPanel.add(corner, BorderLayout.EAST);
@@ -87,31 +120,9 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		setLayout(new BorderLayout());
 		add(viewportPanel, BorderLayout.CENTER);
 		add(hPanel, BorderLayout.SOUTH);
-		add(vBar, BorderLayout.EAST);
-		
-		viewportPanel.addMouseListener(this);
-		viewportPanel.addMouseWheelListener(this);
-		viewportPanel.addMouseMotionListener(this);
-		
-		hBar.addAdjustmentListener(new AdjustmentListener() {
-			@Override
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				hBarAdjusted(e);
-			}
-		});
-		
-		vBar.addAdjustmentListener(new AdjustmentListener() {
-			@Override
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				vBarAdjusted(e);
-			}
-		});
-		
-		addComponentListener(this);
-		
-		setBackground(Color.WHITE);
+		add(vBar, BorderLayout.EAST);		
 	}
-	
+
 	public Canvas getCanvas() {
 		return canvas;
 	}
@@ -129,16 +140,18 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	}
 	
 	private void refreshVisibleSize() {
-		canvas.setScreenSize(getWidth(), getHeight());
-//		double x1 = canvas.xScreenToModel(0);
-//		double y1 = canvas.yScreenToModel(0);
-//		double x2 = canvas.xScreenToModel(getWidth());
-//		double y2 = canvas.yScreenToModel(getHeight());
-//		double x1 = canvas.getConverter().xPixelToModel(0);
-//		double y1 = canvas.getConverter().yPixelToModel(0);
-//		double x2 = canvas.getConverter().xPixelToModel(viewportPanel.getWidth());
-//		double y2 = canvas.getConverter().yPixelToModel(viewportPanel.getHeight());
-//		canvas.setVisibleBounds(new Bounds(x1, y1, x2, y2));
+		int w = getWidth();
+		int h = getHeight();
+		
+		if (hBar.isVisible()) {
+			h -= hBar.getHeight();
+		}
+		
+		if (vBar.isVisible()) {
+			w -= vBar.getWidth();
+		}
+		
+		canvas.setScreenSize(w, h);
 	}
 	
 	public void setStyle(Style style) {
@@ -244,181 +257,21 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		repaint();
 	}
 	
-	private void hBarAdjusted(AdjustmentEvent e) {
-		if (e.getValueIsAdjusting()) {
-			return;
-		}
-		
-		BoundedRangeModel hModel = hBar.getModel();
-		CoordSystem coordSystem = canvas.getCoordSystem();
-		
-		int hMin = hModel.getMinimum();
-		int hMax = hModel.getMaximum();
-		int hValue = hModel.getValue();
-		
-		if (coordSystem.getXDirection() == -1) {
-			hValue = hMin + (hMax - hValue);
-		}
-		
-		double mx = canvas.xScreenToModel(hValue);
-		canvas.adjustOffset(mx-canvas.getLeft(), 0.0);
-	}
-	
-	private void vBarAdjusted(AdjustmentEvent e) {
-		if (e.getValueIsAdjusting()) {
-			return;
-		}
-		
-		BoundedRangeModel vModel = vBar.getModel();
-		CoordSystem coordSystem = canvas.getCoordSystem();
-		
-		int vMin = vModel.getMinimum();
-		int vMax = vModel.getMaximum();
-		int vValue = vModel.getValue();
-		
-		if (coordSystem.getYDirection() == -1) {
-			vValue = vMin + (vMax - vValue);
-		}
-		
-		double my = canvas.yScreenToModel(vValue);
-		canvas.adjustOffset(0.0, my - canvas.getTop());
-	}
-	
-//	@Override
-//	public void adjustmentValueChanged(AdjustmentEvent e) {
-//		if (e.getValueIsAdjusting()) {
-//			return;
-//		}
-//		
-//		BoundedRangeModel hModel = hBar.getModel();
-//		BoundedRangeModel vModel = vBar.getModel();
-//		
-//		int hMin = hModel.getMinimum();
-//		int hMax = hModel.getMaximum();
-//		int hValue = hModel.getValue();
-//		int hExtent = hModel.getExtent();
-//		
-//		int vMin = vModel.getMinimum();
-//		int vMax = vModel.getMaximum();
-//		int vValue = vModel.getValue();
-//		int vExtent = vModel.getExtent();
-//		
-////		System.out.println("vMin : "+vMin);
-////		System.out.println("vMax : "+vMax);
-////		System.out.println("vValue : "+vValue);
-////		System.out.println("vExtent : "+vExtent);
-//		
-//		CoordSystem coordSystem = canvas.getCoordSystem();
-//		
-//		if (coordSystem.getXDirection() == -1) {
-//			hValue = hMin + (hMax - hValue);
-//		}
-//		
-//		if (coordSystem.getYDirection() == -1) {
-//			vValue = vMin + (vMax - vValue);
-//		}
-//		
-//		double mx = canvas.xScreenToModel(hValue);
-//		double my = canvas.yScreenToModel(vValue);
-//		
-//		canvas.adjustOffset(mx-canvas.getLeft(), my - canvas.getTop());
-//	}
-	
 	private void refreshScrollBars() {
-		Bounds mCanvasBounds = canvas.getBounds();
-		Bounds mVisibleBounds = canvas.getVisibleBounds();
+		hBarModel.refresh();
+		vBarModel.refresh();
 		
-//		double pvx = canvas.xModelToPixel(mVisibleBounds.getMinX());
-//		double pvy = canvas.yModelToPixel(mVisibleBounds.getMinY());
-//		double pvw = canvas.xModelToPixel(mVisibleBounds.getWidth());
-//		double pvh = canvas.yModelToPixel(mVisibleBounds.getHeight());
-//		double pcx = canvas.xModelToPixel(mCanvasBounds.getMinX());
-//		double pcy = canvas.yModelToPixel(mCanvasBounds.getMinY());
-//		double pcw = canvas.xModelToPixel(mCanvasBounds.getWidth());
-//		double pch = canvas.yModelToPixel(mCanvasBounds.getHeight());
+		if ((hBar.isVisible() != hBarModel.requireVisible()) || (vBar.isVisible() != vBarModel.requireVisible())) {
+			hBar.setVisible(hBarModel.requireVisible());
+			vBar.setVisible(vBarModel.requireVisible());
+			
+			corner.setVisible(hBarModel.requireVisible() && vBarModel.requireVisible());
+			corner.setPreferredSize(new Dimension(hBar.getHeight(), vBar.getWidth()));
 		
-		double pvx = canvas.xModelToScreen(mVisibleBounds.getMinX());
-		double pvy = canvas.yModelToScreen(mVisibleBounds.getMinY());
-		double pvw = canvas.wModelToScreen(mVisibleBounds.getWidth());
-		double pvh = canvas.hModelToScreen(mVisibleBounds.getHeight());
-		double pcx = canvas.xModelToScreen(mCanvasBounds.getMinX());
-		double pcy = canvas.yModelToScreen(mCanvasBounds.getMinY());
-		double pcw = canvas.wModelToScreen(mCanvasBounds.getWidth());
-		double pch = canvas.hModelToScreen(mCanvasBounds.getHeight());
-		
-		CoordSystem coordSystem = canvas.getCoordSystem();
-		
-		pvx = coordSystem.horizontal(pvx);
-		pcx = coordSystem.horizontal(pcx);
-		pvy = coordSystem.vertical(pvy);
-		pcy = coordSystem.vertical(pcy);
-		
-		int hMin = (int) Math.min(pvx, pcx);
-		int hMax = (int) Math.max(pcx + pcw, pvx + pvw);
-		int hExtent = (int) pvw;
-		int hValue = (int) pvx;
-		
-		int vMin = (int) Math.min(pvy, pcy);
-		int vMax = (int) Math.max(pcy + pch, pvy + pvh);
-		int vExtent = (int) pvh;
-		int vValue = (int) pvy;
-		
-//		System.out.println("*************************");
-//		System.out.println("pvx : "+pvx);
-//		System.out.println("pvw : "+pvw);
-//		System.out.println("pcx : "+pcx);
-//		System.out.println("pcw : "+pcw);
-//		System.out.println("hMin : "+hMin);
-//		System.out.println("hMax : "+hMax);
-//		System.out.println("hExtent : "+hExtent);
-//		System.out.println("hValue : "+hValue);
-//		System.out.println("hValue+hExtent : "+(hValue+hExtent));
-//		System.out.println("------------------------");
-//		System.out.println("pvy : "+pvy);
-//		System.out.println("pvh : "+pvh);
-//		System.out.println("pcy : "+pcy);
-//		System.out.println("pch : "+pch);
-//		System.out.println("vMin : "+vMin);
-//		System.out.println("vMax : "+vMax);
-//		System.out.println("vExtent : "+vExtent);
-//		System.out.println("vValue : "+vValue);
-//		System.out.println("vValue+vExtent : "+(vValue+vExtent));
-		
-		if ((hValue + hExtent) > hMax) {
-			hExtent = hMax - hValue;
+			refreshVisibleSize();
 		}
-		
-		if ((vValue + vExtent) > vMax) {
-			vExtent = vMax - vValue;
-		}
-		
-		if (coordSystem.getXDirection() == -1) {
-			hValue = hMax - hValue + hMin - hExtent;
-		}
-		
-		if (coordSystem.getYDirection() == -1) {
-			vValue = vMax - vValue + vMin - vExtent;
-		}
-		
-		DefaultBoundedRangeModel hModel = new DefaultBoundedRangeModel(hValue, hExtent, hMin, hMax);
-		DefaultBoundedRangeModel vModel = new DefaultBoundedRangeModel(vValue, vExtent, vMin, vMax);
-		
-		hBar.setModel(hModel);
-		vBar.setModel(vModel);
-		
-		boolean hVisible = hModel.getExtent() < (hModel.getMaximum() - hModel.getMinimum());
-		boolean vVisible = vModel.getExtent() < (vModel.getMaximum() - vModel.getMinimum());
-		
-		hBar.setVisible(hVisible);
-		vBar.setVisible(vVisible);
-		
-		corner.setPreferredSize(new Dimension(hBar.getHeight(), vBar.getWidth()));
-		corner.setVisible(hVisible && vVisible);
-		
-		hBar.repaint();
-		vBar.repaint();
 	}
-
+	
 	@Override
 	public void boundsChanged() {
 		refreshScrollBars();

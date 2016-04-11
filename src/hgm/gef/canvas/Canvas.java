@@ -197,6 +197,14 @@ public class Canvas {
 		return coordSystem.horizontal((m - mLeft) / xModelPerScreen());
 	}
 	
+	public double wModelToScreen(double m) {
+		return m * xScreenPerModel();
+	}
+	
+	public double hModelToScreen(double m) {
+		return m * yScreenPerModel();
+	}
+	
 	public double yModelToScreen(double m) {
 		return coordSystem.vertical((m - mTop) / yModelPerScreen());
 	}

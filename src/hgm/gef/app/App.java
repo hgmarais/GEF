@@ -74,8 +74,6 @@ public class App {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		
-//		canvas.fitEditor();
-//		canvas.resizeCanvasToEditor();
 		canvasPanel1.getCanvas().zoomFitCanvas();
 		canvasPanel2.getCanvas().zoomFitCanvas();
 	}

@@ -28,7 +28,7 @@ import hgm.gef.editor.LayerManagerListener;
 import hgm.gef.fig.Bounds;
 import hgm.gef.layer.Layer;
 
-public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, AdjustmentListener {
+public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener {
 	
 	/***/
 	private static final long serialVersionUID = 1L;
@@ -92,8 +92,21 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		viewportPanel.addMouseListener(this);
 		viewportPanel.addMouseWheelListener(this);
 		viewportPanel.addMouseMotionListener(this);
-		hBar.addAdjustmentListener(this);
-		vBar.addAdjustmentListener(this);
+		
+		hBar.addAdjustmentListener(new AdjustmentListener() {
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				hBarAdjusted(e);
+			}
+		});
+		
+		vBar.addAdjustmentListener(new AdjustmentListener() {
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				vBarAdjusted(e);
+			}
+		});
+		
 		addComponentListener(this);
 		
 		setBackground(Color.WHITE);
@@ -231,8 +244,48 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		repaint();
 	}
 	
-	@Override
-	public void adjustmentValueChanged(AdjustmentEvent e) {
+	private void hBarAdjusted(AdjustmentEvent e) {
+		if (e.getValueIsAdjusting()) {
+			return;
+		}
+		
+		BoundedRangeModel hModel = hBar.getModel();
+		CoordSystem coordSystem = canvas.getCoordSystem();
+		
+		int hMin = hModel.getMinimum();
+		int hMax = hModel.getMaximum();
+		int hValue = hModel.getValue();
+		
+		if (coordSystem.getXDirection() == -1) {
+			hValue = hMin + (hMax - hValue);
+		}
+		
+		double mx = canvas.xScreenToModel(hValue);
+		canvas.adjustOffset(mx-canvas.getLeft(), 0.0);
+	}
+	
+	private void vBarAdjusted(AdjustmentEvent e) {
+		if (e.getValueIsAdjusting()) {
+			return;
+		}
+		
+		BoundedRangeModel vModel = vBar.getModel();
+		CoordSystem coordSystem = canvas.getCoordSystem();
+		
+		int vMin = vModel.getMinimum();
+		int vMax = vModel.getMaximum();
+		int vValue = vModel.getValue();
+		
+		if (coordSystem.getYDirection() == -1) {
+			vValue = vMin + (vMax - vValue);
+		}
+		
+		double my = canvas.yScreenToModel(vValue);
+		canvas.adjustOffset(0.0, my - canvas.getTop());
+	}
+	
+//	@Override
+//	public void adjustmentValueChanged(AdjustmentEvent e) {
 //		if (e.getValueIsAdjusting()) {
 //			return;
 //		}
@@ -249,49 +302,56 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 //		int vMax = vModel.getMaximum();
 //		int vValue = vModel.getValue();
 //		int vExtent = vModel.getExtent();
-		
-//		System.out.println("vMin : "+vMin);
-//		System.out.println("vMax : "+vMax);
-//		System.out.println("vValue : "+vValue);
-//		System.out.println("vExtent : "+vExtent);
-		
+//		
+////		System.out.println("vMin : "+vMin);
+////		System.out.println("vMax : "+vMax);
+////		System.out.println("vValue : "+vValue);
+////		System.out.println("vExtent : "+vExtent);
+//		
 //		CoordSystem coordSystem = canvas.getCoordSystem();
-		
+//		
 //		if (coordSystem.getXDirection() == -1) {
-//			hValue = hMin + (hMax - hValue) + hExtent;
+//			hValue = hMin + (hMax - hValue);
 //		}
-		
+//		
 //		if (coordSystem.getYDirection() == -1) {
 //			vValue = vMin + (vMax - vValue);
 //		}
 //		
-//		double mx = canvas.xPixelToModel(hValue);
-//		double my = canvas.yPixelToModel(vValue);
+//		double mx = canvas.xScreenToModel(hValue);
+//		double my = canvas.yScreenToModel(vValue);
 //		
-//		canvas.adjustOffset(mx-canvas.getLeft(), coordSystem.vertical(my - canvas.getTop()));
-	}
+//		canvas.adjustOffset(mx-canvas.getLeft(), my - canvas.getTop());
+//	}
 	
 	private void refreshScrollBars() {
 		Bounds mCanvasBounds = canvas.getBounds();
 		Bounds mVisibleBounds = canvas.getVisibleBounds();
 		
-		double pvx = canvas.xModelToPixel(mVisibleBounds.getMinX());
-		double pvy = canvas.yModelToPixel(mVisibleBounds.getMinY());
-		double pvw = canvas.xModelToPixel(mVisibleBounds.getWidth());
-		double pvh = canvas.yModelToPixel(mVisibleBounds.getHeight());
-		double pcx = canvas.xModelToPixel(mCanvasBounds.getMinX());
-		double pcy = canvas.yModelToPixel(mCanvasBounds.getMinY());
-		double pcw = canvas.xModelToPixel(mCanvasBounds.getWidth());
-		double pch = canvas.yModelToPixel(mCanvasBounds.getHeight());
+//		double pvx = canvas.xModelToPixel(mVisibleBounds.getMinX());
+//		double pvy = canvas.yModelToPixel(mVisibleBounds.getMinY());
+//		double pvw = canvas.xModelToPixel(mVisibleBounds.getWidth());
+//		double pvh = canvas.yModelToPixel(mVisibleBounds.getHeight());
+//		double pcx = canvas.xModelToPixel(mCanvasBounds.getMinX());
+//		double pcy = canvas.yModelToPixel(mCanvasBounds.getMinY());
+//		double pcw = canvas.xModelToPixel(mCanvasBounds.getWidth());
+//		double pch = canvas.yModelToPixel(mCanvasBounds.getHeight());
 		
-//		double pvx = canvas.xModelToScreen(mVisibleBounds.getMinX());
-//		double pvy = canvas.yModelToScreen(mVisibleBounds.getMinY());
-//		double pvw = canvas.xModelToScreen(mVisibleBounds.getWidth());
-//		double pvh = canvas.yModelToScreen(mVisibleBounds.getHeight());
-//		double pcx = canvas.xModelToScreen(mCanvasBounds.getMinX());
-//		double pcy = canvas.yModelToScreen(mCanvasBounds.getMinY());
-//		double pcw = canvas.xModelToScreen(mCanvasBounds.getWidth());
-//		double pch = canvas.yModelToScreen(mCanvasBounds.getHeight());
+		double pvx = canvas.xModelToScreen(mVisibleBounds.getMinX());
+		double pvy = canvas.yModelToScreen(mVisibleBounds.getMinY());
+		double pvw = canvas.wModelToScreen(mVisibleBounds.getWidth());
+		double pvh = canvas.hModelToScreen(mVisibleBounds.getHeight());
+		double pcx = canvas.xModelToScreen(mCanvasBounds.getMinX());
+		double pcy = canvas.yModelToScreen(mCanvasBounds.getMinY());
+		double pcw = canvas.wModelToScreen(mCanvasBounds.getWidth());
+		double pch = canvas.hModelToScreen(mCanvasBounds.getHeight());
+		
+		CoordSystem coordSystem = canvas.getCoordSystem();
+		
+		pvx = coordSystem.horizontal(pvx);
+		pcx = coordSystem.horizontal(pcx);
+		pvy = coordSystem.vertical(pvy);
+		pcy = coordSystem.vertical(pcy);
 		
 		int hMin = (int) Math.min(pvx, pcx);
 		int hMax = (int) Math.max(pcx + pcw, pvx + pvw);
@@ -331,8 +391,6 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		if ((vValue + vExtent) > vMax) {
 			vExtent = vMax - vValue;
 		}
-		
-		CoordSystem coordSystem = canvas.getCoordSystem();
 		
 		if (coordSystem.getXDirection() == -1) {
 			hValue = hMax - hValue + hMin - hExtent;

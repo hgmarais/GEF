@@ -1,12 +1,12 @@
-package hgm.gef.editor;
+package hgm.gef.canvas;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.util.LinkedList;
 
+import hgm.gef.BasicStyle;
 import hgm.gef.Style;
-import hgm.gef.canvas.Canvas;
-import hgm.gef.canvas.XYCanvasConverter;
 import hgm.gef.fig.Bounds;
 
 public class Painter {
@@ -29,15 +29,14 @@ public class Painter {
 	private void apply(Graphics2D g) {
 		double zoom = canvas.getZoom();
 		CoordSystem coordSystem = canvas.getCoordSystem();
-		double xScale = (double)coordSystem.getXDirection() * zoom;
-		double yScale = (double)coordSystem.getYDirection() * zoom;
+		double xScale = (double)coordSystem.getXDirection() * canvas.xPixelToModel(zoom);
+		double yScale = (double)coordSystem.getYDirection() * canvas.yPixelToModel(zoom);
 
 		g.scale(xScale, yScale);
 		g.translate(-canvas.getLeft(), -canvas.getTop());
-	}
-	
-	public XYCanvasConverter getConverter() {
-		return canvas.getConverter();
+		
+		pushStyle(BasicStyle.dashedLine(false, Color.BLACK));
+		paint(canvas.getBounds().toRectangle());
 	}
 	
 	public void pushStyle(Style style) {

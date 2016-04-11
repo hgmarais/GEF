@@ -2,7 +2,7 @@ package hgm.gef.fig;
 
 import java.awt.Shape;
 
-import hgm.gef.editor.Painter;
+import hgm.gef.canvas.Painter;
 
 public class ShapeFig extends LayerFig {
 

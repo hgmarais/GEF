@@ -13,33 +13,41 @@ import javax.swing.SwingUtilities;
 import hgm.gef.BasicStyle;
 import hgm.gef.canvas.Canvas;
 import hgm.gef.canvas.CanvasPanel;
-import hgm.gef.editor.CartesianCoordSystem;
-import hgm.gef.editor.CoordSystem;
-import hgm.gef.editor.LayerManager;
-import hgm.gef.editor.ScreenCoordSystem;
+import hgm.gef.canvas.CartesianCoordSystem;
+import hgm.gef.canvas.CoordSystem;
+import hgm.gef.canvas.ScreenCoordSystem;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.ShapeFig;
 import hgm.gef.layer.DefaultLayer;
+import hgm.gef.layer.LayerManager;
 
 public class App {
 	
 	public static CanvasPanel createCanvasPanel(CoordSystem coordSystem) {
 		ShapeFig fig1 = new ShapeFig(new Rectangle(0, 0, 200, 200));
 		ShapeFig fig2 = new ShapeFig(new Rectangle(200, 200, 200, 200));
-		ShapeFig fig3 = new ShapeFig(new Line2D.Double(0, 0, 500, 0));
-		ShapeFig fig4 = new ShapeFig(new Line2D.Double(0, 0, 0, 500));
+		ShapeFig fig3 = new ShapeFig(new Rectangle(-200, -200, 200, 200));
+		ShapeFig fig4 = new ShapeFig(new Rectangle(-400, -400, 200, 200));
 		
-		fig1.setStyle(new BasicStyle(Color.WHITE, Color.BLUE));
-		fig2.setStyle(new BasicStyle(Color.YELLOW, Color.GREEN));
-		fig3.setStyle(new BasicStyle(Color.MAGENTA, null));
-		fig4.setStyle(new BasicStyle(Color.CYAN, null));
+		ShapeFig xLine = new ShapeFig(new Line2D.Double(0, 0, 500, 0));
+		ShapeFig yLine = new ShapeFig(new Line2D.Double(0, 0, 0, 500));
+		
+		fig1.setStyle(new BasicStyle(null, Color.RED));
+		fig2.setStyle(new BasicStyle(null, Color.GREEN));
+		fig3.setStyle(new BasicStyle(null, Color.BLUE));
+		fig4.setStyle(new BasicStyle(null, Color.ORANGE));
+		
+		xLine.setStyle(BasicStyle.dashedLine(false, Color.MAGENTA));
+		yLine.setStyle(BasicStyle.dashedLine(false, Color.CYAN));
 		
 		DefaultLayer layer = new DefaultLayer();
 		
-		layer.addFigure(fig3);
-		layer.addFigure(fig4);
+		layer.addFigure(xLine);
+		layer.addFigure(yLine);
 		layer.addFigure(fig1);
 		layer.addFigure(fig2);
+		layer.addFigure(fig3);
+		layer.addFigure(fig4);
 		
 		Canvas canvas = new Canvas(coordSystem);
 		canvas.setBounds(new Bounds(0, 0, 400, 400));
@@ -68,7 +76,7 @@ public class App {
 		
 		JFrame frame = new JFrame("GEF App");
 		frame.setContentPane(panel);
-		frame.setSize(800, 600);
+		frame.setSize(1024, 600);
 //		frame.setLocationRelativeTo(null);
 		frame.setLocation(500, 0);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -76,8 +84,8 @@ public class App {
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				canvasPanel1.getCanvas().zoomFitCanvas();
-				canvasPanel2.getCanvas().zoomFitCanvas();		
+//				canvasPanel1.getCanvas().zoomFitCanvas();
+//				canvasPanel2.getCanvas().zoomFitCanvas();
 			}
 		});
 	}

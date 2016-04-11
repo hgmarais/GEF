@@ -1,6 +1,4 @@
-package hgm.gef.editor;
-
-import hgm.gef.layer.Layer;
+package hgm.gef.layer;
 
 public interface LayerManagerListener {
 

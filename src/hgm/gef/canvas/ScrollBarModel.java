@@ -2,7 +2,6 @@ package hgm.gef.canvas;
 
 import javax.swing.DefaultBoundedRangeModel;
 
-import hgm.gef.editor.CoordSystem;
 import hgm.gef.fig.Bounds;
 
 public class ScrollBarModel extends DefaultBoundedRangeModel {
@@ -16,8 +15,6 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 	
 	private boolean requireVisible = true;
 
-	private boolean adjusting;
-	
 	public ScrollBarModel(CanvasPanel canvasPanel, boolean horizontal) {
 		this.canvasPanel = canvasPanel;
 		this.horizontal = horizontal;
@@ -50,11 +47,8 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 		
 		CoordSystem coordSystem = canvas.getCoordSystem();
 
-		pvx = coordSystem.horizontal(pvx);
-		pcx = coordSystem.horizontal(pcx);
-		
 		double hMin = Math.min(pvx, pcx);
-		double hMax = Math.max(pcx + pcw, pvx + pvw);
+		double hMax = Math.max(pcx + coordSystem.horizontal(pcw), pvx + coordSystem.horizontal(pvw));
 		double hExtent = pvw;
 		double hValue = pvx;
 		
@@ -109,24 +103,14 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 		int sValue = (int)((double)size * value / diff);
 		int sExtent = (int)((double)size * extent / diff);
 		
-		setRangeProperties(sValue, sExtent, sMin, sMax, adjusting);
+		setRangeProperties(sValue, sExtent, sMin, sMax, false);
 	}
 	
 	public void applyToCanvas() {
-		if (adjusting) {
-			return;
-		}
-		
-		adjusting = true;
-		
-		try {
-			if (horizontal) {
-				applyHorizontal();
-			} else {
-				applyVertical();
-			}
-		} finally {
-			adjusting = false;
+		if (horizontal) {
+			applyHorizontal();
+		} else {
+			applyVertical();
 		}
 	}
 
@@ -196,6 +180,10 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 		newValue = coordSystem.vertical(newValue);
 		
 		canvas.adjustOffset(0.0, newValue);		
+	}
+
+	public void adjust(int d) {
+		setValue(getValue() + d);
 	}
 	
 }

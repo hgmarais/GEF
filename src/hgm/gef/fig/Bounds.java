@@ -87,9 +87,13 @@ public class Bounds {
 		return getMinY() + percentage * getHeight();
 	}
 	
+	public Rectangle2D toRectangle() {
+		return new Rectangle2D.Double(getMinX(), getMinY(), getWidth(), getHeight());
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("%.2f, %.2f - %.2f, %.2f", getMinX(), getMinY(), getMaxX(), getMaxY());
 	}
-	
+
 }

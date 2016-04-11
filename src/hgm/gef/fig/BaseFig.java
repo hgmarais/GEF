@@ -1,7 +1,7 @@
 package hgm.gef.fig;
 
 import hgm.gef.Style;
-import hgm.gef.editor.Painter;
+import hgm.gef.canvas.Painter;
 import hgm.gef.selection.Selection;
 
 public abstract class BaseFig implements Fig {

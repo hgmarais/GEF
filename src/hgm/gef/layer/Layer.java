@@ -3,7 +3,6 @@ package hgm.gef.layer;
 import java.util.List;
 
 import hgm.gef.Paintable;
-import hgm.gef.editor.LayerManager;
 import hgm.gef.fig.Bounded;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;

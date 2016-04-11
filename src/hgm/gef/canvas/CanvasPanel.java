@@ -21,9 +21,9 @@ import javax.swing.JScrollBar;
 
 import hgm.gef.BasicStyle;
 import hgm.gef.Style;
-import hgm.gef.editor.LayerManagerListener;
 import hgm.gef.fig.Bounds;
 import hgm.gef.layer.Layer;
+import hgm.gef.layer.LayerManagerListener;
 
 public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener {
 	
@@ -217,10 +217,12 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 //				canvas.adjustDimension(0.0, -e.getPreciseWheelRotation());
 //			}
 		} else {
+			int diff = (int) e.getPreciseWheelRotation();
+			
 			if (e.isShiftDown()) {
-				canvas.adjustOffset(e.getPreciseWheelRotation(), 0.0);
+				hBarModel.adjust(diff);
 			} else {
-				canvas.adjustOffset(0.0, e.getPreciseWheelRotation());
+				vBarModel.adjust(diff);
 			}
 		}
 		
@@ -264,7 +266,7 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	private void refreshScrollBars() {
 		hBarModel.refresh();
 		vBarModel.refresh();
-		
+	
 		if ((hBar.isVisible() != hBarModel.requireVisible()) || (vBar.isVisible() != vBarModel.requireVisible())) {
 			hBar.setVisible(hBarModel.requireVisible());
 			vBar.setVisible(vBarModel.requireVisible());
@@ -279,6 +281,12 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	@Override
 	public void boundsChanged() {
 		refreshScrollBars();
+		repaint();
+	}
+	
+	@Override
+	public void converterChanged() {
+		refreshVisibleSize();
 		repaint();
 	}
 

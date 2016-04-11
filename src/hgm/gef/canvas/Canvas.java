@@ -6,10 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import hgm.gef.Style;
-import hgm.gef.editor.CoordSystem;
-import hgm.gef.editor.LayerManager;
-import hgm.gef.editor.Painter;
 import hgm.gef.fig.Bounds;
+import hgm.gef.layer.LayerManager;
 import hgm.gef.selection.SelectionManager;
 
 public class Canvas {
@@ -18,11 +16,7 @@ public class Canvas {
 	
 	private SelectionManager selectionManager;
 	
-	private XYCanvasConverter converter;
-	
 	private Bounds mCanvasBounds = new Bounds(0, 0, 0, 0);
-	
-//	private Bounds mVisibleBounds = new Bounds(0, 0, 0, 0);
 	
 	private double mLeft = 0.0;
 	
@@ -38,12 +32,26 @@ public class Canvas {
 	
 	private double zoom = 1.0;
 	
+	private double xPixelsPerModel = 1.0;
+	
+	private double yPixelsPerModel = 1.0;
+	
 	public Canvas(CoordSystem coordSystem) {
 		this.coordSystem = coordSystem;
-		converter = new XYCanvasConverter(this);
 		layerManager = new LayerManager(this);
 		selectionManager = new SelectionManager(this);
 	}
+	
+	public void setXPixelsPerModel(double xPixelsPerModel) {
+		this.xPixelsPerModel = xPixelsPerModel;
+		fireConverterChanged();
+	}
+	
+	public void setYPixelsPerModel(double yPixelsPerModel) {
+		this.yPixelsPerModel = yPixelsPerModel;
+		fireConverterChanged();
+	}
+	
 	
 	public CoordSystem getCoordSystem() {
 		return coordSystem;
@@ -55,10 +63,6 @@ public class Canvas {
 	
 	public SelectionManager getSelectionManager() {
 		return selectionManager;
-	}
-	
-	public XYCanvasConverter getConverter() {
-		return converter;
 	}
 	
 	public void setBounds(Bounds mBounds) {
@@ -214,27 +218,33 @@ public class Canvas {
 	}
 	
 	public double xScreenToModel(double s) {
-		return mLeft + coordSystem.horizontal(s) * xModelPerScreen();
+		return mLeft + (coordSystem.horizontal(s) * xModelPerScreen());
 	}
 	
 	public double yScreenToModel(double s) {
-		return mTop +  coordSystem.vertical(s) * yModelPerScreen();
+		return mTop + (coordSystem.vertical(s) * yModelPerScreen());
 	}
 	
 	public double xModelToPixel(double m) {
-		return getConverter().getX().modelToPixel(m);
+		return m * xPixelsPerModel;
 	}
 	
 	public double yModelToPixel(double m) {
-		return getConverter().getY().modelToPixel(m);
+		return m * yPixelsPerModel;
 	}
 	
-	public double xPixelToModel(int p) {
-		return getConverter().getX().pixelToModel(p);
+	public double xPixelToModel(double p) {
+		return p / xPixelsPerModel; 
 	}
 	
-	public double yPixelToModel(int p) {
-		return getConverter().getY().pixelToModel(p);
+	public double yPixelToModel(double p) {
+		return p / yPixelsPerModel;
+	}
+	
+	private void fireConverterChanged() {
+		for (CanvasListener listener : cloneListeners()) {
+			listener.converterChanged();
+		}
 	}
 	
 	private void fireZoomChanged() {

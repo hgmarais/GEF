@@ -1,4 +1,4 @@
-package hgm.gef.editor;
+package hgm.gef.layer;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -7,10 +7,10 @@ import java.util.List;
 
 import hgm.gef.Paintable;
 import hgm.gef.canvas.Canvas;
+import hgm.gef.canvas.Painter;
 import hgm.gef.fig.Bounded;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
-import hgm.gef.layer.Layer;
 import hgm.gef.util.GEFUtil;
 
 public class LayerManager implements Bounded, Paintable {

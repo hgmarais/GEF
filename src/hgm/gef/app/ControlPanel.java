@@ -53,7 +53,9 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 	
 	private JLabel offsetLabel;
 	
-	private JButton fitLayers;
+	private JButton zoomLayers;
+	
+	private JButton zoomCanvas;
 	
 	private JButton fitCanvas;
 
@@ -102,20 +104,28 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 			}
 		});
 		
-		fitLayers = new JButton("Fit Layers");
+		zoomLayers = new JButton("Zoom Layers");
+		zoomCanvas = new JButton("Zoom Canvas");
 		fitCanvas = new JButton("Fit Canvas");
 		
-		fitLayers.addActionListener(new ActionListener() {
+		zoomLayers.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				canvas.zoomFitLayers();
 			}
 		});
 		
-		fitCanvas.addActionListener(new ActionListener() {
+		zoomCanvas.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				canvas.zoomFitCanvas();
+			}
+		});
+		
+		fitCanvas.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				canvas.setBounds(canvas.getLayerManager().getBounds());
 			}
 		});
 		
@@ -143,7 +153,8 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 		add(modelLabel);
 		add(new JLabel("offset:"));
 		add(offsetLabel);
-		add(fitLayers);
+		add(zoomLayers);
+		add(zoomCanvas);
 		add(fitCanvas);
 	}
 	
@@ -194,6 +205,12 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 		mouseLabel.setText(e.getX()+", "+e.getY());
 		modelLabel.setText((int)canvas.xScreenToModel(e.getX())+", "+(int)canvas.yScreenToModel(e.getY()));
 		offsetLabel.setText((int)canvas.getLeft()+", "+(int)canvas.getTop());
+	}
+
+	@Override
+	public void converterChanged() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

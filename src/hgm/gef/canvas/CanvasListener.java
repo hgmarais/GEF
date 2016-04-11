@@ -14,4 +14,6 @@ public interface CanvasListener {
 
 	void repaintRequested(Bounds mb);
 
+	void converterChanged();
+
 }

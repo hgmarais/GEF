@@ -1,4 +1,4 @@
-package hgm.gef.editor;
+package hgm.gef.canvas;
 
 public class CartesianCoordSystem extends CoordSystem {
 

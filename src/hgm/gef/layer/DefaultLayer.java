@@ -4,8 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import hgm.gef.editor.LayerManager;
-import hgm.gef.editor.Painter;
+import hgm.gef.canvas.Painter;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
 import hgm.gef.util.GEFUtil;

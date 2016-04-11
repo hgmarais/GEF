@@ -1,4 +1,4 @@
-package hgm.gef.editor;
+package hgm.gef.canvas;
 
 import hgm.gef.fig.Bounds;
 

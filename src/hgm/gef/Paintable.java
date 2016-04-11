@@ -1,6 +1,6 @@
 package hgm.gef;
 
-import hgm.gef.editor.Painter;
+import hgm.gef.canvas.Painter;
 
 public interface Paintable {
 	

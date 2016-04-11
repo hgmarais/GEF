@@ -6,9 +6,9 @@ import java.util.List;
 
 import hgm.gef.Paintable;
 import hgm.gef.canvas.Canvas;
-import hgm.gef.editor.LayerManager;
-import hgm.gef.editor.Painter;
+import hgm.gef.canvas.Painter;
 import hgm.gef.fig.LayerFig;
+import hgm.gef.layer.LayerManager;
 import hgm.gef.util.GEFUtil;
 
 public class SelectionManager implements Paintable {

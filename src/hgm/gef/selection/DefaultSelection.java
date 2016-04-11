@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import hgm.gef.BasicStyle;
 import hgm.gef.Style;
-import hgm.gef.editor.Painter;
+import hgm.gef.canvas.Painter;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.Fig;
 

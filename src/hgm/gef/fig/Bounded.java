@@ -18,7 +18,13 @@ public interface Bounded extends PropertyOwner {
 	}
 	
 	default boolean contains(double mx, double my) {
-		return getBounds().contains(mx, my);
+		Bounds bounds = getBounds();
+		
+		if (bounds == null) {
+			return false;
+		}
+		
+		return bounds.contains(mx, my);
 	}
 	
 	default void fireBoundsChanged() {

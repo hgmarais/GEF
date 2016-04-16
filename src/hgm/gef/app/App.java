@@ -18,11 +18,11 @@ import hgm.gef.canvas.ScreenCoordSystem;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.RectangleFig;
 import hgm.gef.fig.ShapeFig;
-import hgm.gef.function.PropertyApplier;
-import hgm.gef.function.PropertyApplierBuilder;
+import hgm.gef.function.PropertyLinkBuilder;
 import hgm.gef.layer.AxisLayer;
 import hgm.gef.layer.BasicLayer;
 import hgm.gef.layer.LayerManager;
+import hgm.gef.util.Unit;
 
 public class App {
 	
@@ -31,8 +31,13 @@ public class App {
 //		ShapeFig fig2 = new ShapeFig(new Rectangle(200, 200, 200, 200));
 //		ShapeFig fig3 = new ShapeFig(new Rectangle(-200, -200, 200, 200));
 //		ShapeFig fig4 = new ShapeFig(new Rectangle(-400, -400, 200, 200));
-		RectangleFig fig5 = new RectangleFig(0, 0, 100, 100);
-		RectangleFig fig6 = new RectangleFig(190, 190, 200, 200);
+		RectangleFig fig5 = new RectangleFig(100, 100, 200, 200);
+		RectangleFig fig6 = new RectangleFig(250, 250, 300, 300);
+		
+		fig5.setPropertyUnit(RectangleFig.X1, Unit.SCREEN);
+		fig5.setPropertyUnit(RectangleFig.Y1, Unit.SCREEN);
+		fig5.setPropertyUnit(RectangleFig.X2, Unit.SCREEN);
+		fig5.setPropertyUnit(RectangleFig.Y2, Unit.SCREEN);
 		
 		ShapeFig xLine = new ShapeFig(new Line2D.Double(0, 0, 500, 0));
 		ShapeFig yLine = new ShapeFig(new Line2D.Double(0, 0, 0, 500));
@@ -63,8 +68,6 @@ public class App {
 		canvas.setBounds(new Bounds(-100, -100, 100, 100));
 //		canvas.centerOnOrigin();
 
-		canvas.getPropertySupplier(Double.class, Canvas.LEFT);
-		
 //		PropertyApplier<Double, Double> xApplier = PropertyApplierBuilder
 //			.from(fig5, RectangleFig.X2, Double.class)
 //			.via(d -> d+20)
@@ -75,16 +78,16 @@ public class App {
 //				.via(d -> d+10)
 //				.to(fig6, RectangleFig.Y1);
 		
-		PropertyApplierBuilder
+		PropertyLinkBuilder
 			.from(canvas, Canvas.MOUSE_POSITION, Point2D.class)
-			.via(p -> p)
-			.via(canvas.pointScreenToModel())
-			.to(fig5, RectangleFig.POINT1).toPropertyLink();
+			.via(p -> p == null ? new Point2D.Double(0, 0) : p)
+			.via(p -> new Point2D.Double(p.getX() + 10, p.getY() + 10))
+			.to(fig5, RectangleFig.POINT1).toLink();
 		
-		PropertyApplierBuilder
+		PropertyLinkBuilder
 			.from(fig5, RectangleFig.POINT1, Point2D.class)
-			.via(p -> new Point2D.Double(p.getX() - canvas.wScreenToModel(10), p.getY() - 10))
-			.to(fig5, RectangleFig.POINT2).toPropertyLink();
+			.via(p -> new Point2D.Double(p.getX() + 10, p.getY() + 10))
+			.to(fig5, RectangleFig.POINT2).toLink();
 		
 		LayerManager layerManager = canvas.getLayerManager();
 		layerManager.addToTop(layer);

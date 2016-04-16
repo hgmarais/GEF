@@ -1,11 +1,9 @@
 package hgm.gef.selection;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.Fig;
-import hgm.gef.property.PropertyListener;
+import hgm.gef.property.PropertyOwner;
+import hgm.gef.property.ProxyPropertyOwner;
 
 public abstract class AbstractSelection implements Selection {
 	
@@ -13,11 +11,16 @@ public abstract class AbstractSelection implements Selection {
 	
 	protected final Fig figure;
 	
-	private LinkedList<PropertyListener> propertyListeners = new LinkedList<>();
+	private ProxyPropertyOwner propertyOwner = new ProxyPropertyOwner(this);
 
 	public AbstractSelection(SelectionManager selectionManager, Fig figure) {
 		this.selectionManager = selectionManager;
 		this.figure = figure;
+	}
+	
+	@Override
+	public PropertyOwner getPropertyOwner() {
+		return propertyOwner;
 	}
 	
 	@Override
@@ -28,11 +31,6 @@ public abstract class AbstractSelection implements Selection {
 	@Override
 	public Fig getFigure() {
 		return figure;
-	}
-	
-	@Override
-	public List<PropertyListener> getPropertyListeners() {
-		return propertyListeners;
 	}
 	
 	@Override

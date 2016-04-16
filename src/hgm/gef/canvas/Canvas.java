@@ -12,9 +12,10 @@ import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
 import hgm.gef.layer.Layer;
 import hgm.gef.layer.LayerManager;
-import hgm.gef.property.PropertyListener;
 import hgm.gef.property.PropertyOwner;
+import hgm.gef.property.ProxyPropertyOwner;
 import hgm.gef.selection.SelectionManager;
+import hgm.gef.util.Unit;
 
 public class Canvas implements PropertyOwner {
 	
@@ -60,12 +61,17 @@ public class Canvas implements PropertyOwner {
 	
 	private LinkedList<CanvasListener> listeners = new LinkedList<>();
 	
-	private LinkedList<PropertyListener> propertyListeners = new LinkedList<>();
+	private ProxyPropertyOwner propertyOwner = new ProxyPropertyOwner(this);
 	
 	public Canvas(CoordSystem coordSystem) {
 		this.coordSystem = coordSystem;
 		layerManager = new LayerManager(this);
 		selectionManager = new SelectionManager(this);
+	}
+	
+	@Override
+	public PropertyOwner getPropertyOwner() {
+		return propertyOwner;
 	}
 	
 	public void addBehaviour(Behaviour behaviour) {
@@ -502,11 +508,6 @@ public class Canvas implements PropertyOwner {
 		return null;
 	}
 
-	@Override
-	public List<PropertyListener> getPropertyListeners() {
-		return propertyListeners;
-	}
-
 	public Function<Point2D, Point2D> pointScreenToModel() {
 		return (s) -> {
 			if (s == null) {
@@ -514,6 +515,22 @@ public class Canvas implements PropertyOwner {
 			}
 			return new Point2D.Double(xScreenToModel(s.getX()), yScreenToModel(s.getY())); 
 		};
+	}
+
+	public double xConvertToModel(double x, Unit unit) {
+		if ((unit == null) || (unit == Unit.MODEL)) {
+			return x;
+		}
+		
+		return xScreenToModel(x);
+	}
+	
+	public double yConvertToModel(double y, Unit unit) {
+		if ((unit == null) || (unit == Unit.MODEL)) {
+			return y;
+		}
+		
+		return yScreenToModel(y);
 	}
 
 }

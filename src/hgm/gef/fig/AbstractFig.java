@@ -1,11 +1,9 @@
 package hgm.gef.fig;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import hgm.gef.Style;
 import hgm.gef.canvas.Painter;
-import hgm.gef.property.PropertyListener;
+import hgm.gef.property.PropertyOwner;
+import hgm.gef.property.ProxyPropertyOwner;
 import hgm.gef.selection.Selection;
 
 public abstract class AbstractFig implements Fig {
@@ -14,11 +12,11 @@ public abstract class AbstractFig implements Fig {
 	
 	private Selection selection;
 	
-	private List<PropertyListener> propertyListeners = new LinkedList<>();
+	private ProxyPropertyOwner propertyOwner = new ProxyPropertyOwner(this);
 	
 	@Override
-	public List<PropertyListener> getPropertyListeners() {
-		return propertyListeners;
+	public PropertyOwner getPropertyOwner() {
+		return propertyOwner;
 	}
 	
 	@Override

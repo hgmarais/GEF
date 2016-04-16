@@ -59,6 +59,10 @@ public class AxisLayer extends AbstractLayer {
 		
 		p.popStyle();
 	}
+	
+	@Override
+	public void refresh() {
+	}
 
 	private void paintHorizontal(Painter p) {
 		Bounds bounds = p.canvas.getVisibleBounds();

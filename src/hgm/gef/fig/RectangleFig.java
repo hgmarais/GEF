@@ -1,8 +1,12 @@
 package hgm.gef.fig;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
-public class RectangleFig extends ShapeFig {
+import hgm.gef.canvas.Canvas;
+import hgm.gef.canvas.Painter;
+
+public class RectangleFig extends LayerFig {
 	
 	public static final String POINT1 = "POINT1";
 	
@@ -23,17 +27,29 @@ public class RectangleFig extends ShapeFig {
 	private double x2;
 	
 	private double y2;
+
+	private Rectangle2D shape;
 	
 	public RectangleFig(double x1, double y1, double x2, double y2) {
 		this.x1 = x1;
 		this.y1 = y1;
 		this.x2 = x2;
 		this.y2 = y2;
-		refreshShape();
 	}
-
-	private void refreshShape() {
-		setShape(new Bounds(x1, y1, x2, y2).toRectangle());
+	
+	public void refreshShape() {
+		Canvas canvas = getCanvas();
+		
+		if (canvas == null) {
+			return;
+		}
+		
+		double mx1 = canvas.xConvertToModel(x1, getPropertyUnit(X1));
+		double my1 = canvas.yConvertToModel(y1, getPropertyUnit(Y1));
+		double mx2 = canvas.xConvertToModel(x2, getPropertyUnit(X2));
+		double my2 = canvas.yConvertToModel(y2, getPropertyUnit(Y2));
+		
+		shape = new Bounds(mx1, my1, mx2, my2).toRectangle();
 	}
 	
 	@Override
@@ -45,25 +61,25 @@ public class RectangleFig extends ShapeFig {
 		switch (name) {
 		case X1: 
 			x1 = ((Number) value).doubleValue();
-			refreshShape();
+			refresh();
 			firePropertyChanged(X1);
 			firePropertyChanged(POINT1);
 			break;
 		case Y1: 
 			y1 = ((Number) value).doubleValue();
-			refreshShape();
+			refresh();
 			firePropertyChanged(Y1);
 			firePropertyChanged(POINT1);
 			break;
 		case X2: 
 			x2 = ((Number) value).doubleValue();
-			refreshShape();
+			refresh();
 			firePropertyChanged(X2);
 			firePropertyChanged(POINT2);
 			break;
 		case Y2: 
 			y2 = ((Number) value).doubleValue();
-			refreshShape();
+			refresh();
 			firePropertyChanged(Y1);
 			firePropertyChanged(POINT2);
 			break;
@@ -81,7 +97,7 @@ public class RectangleFig extends ShapeFig {
 	public void setPoint1(Point2D value) {
 		x1 = value.getX();
 		y1 = value.getY();
-		refreshShape();
+		refresh();
 		firePropertyChanged(X1);
 		firePropertyChanged(Y1);
 		firePropertyChanged(POINT1);
@@ -98,7 +114,7 @@ public class RectangleFig extends ShapeFig {
 	public void setPoint2(Point2D value) {
 		x2 = value.getX();
 		y2 = value.getY();
-		refreshShape();
+		refresh();
 		firePropertyChanged(X2);
 		firePropertyChanged(Y2);
 		firePropertyChanged(POINT2);
@@ -116,6 +132,21 @@ public class RectangleFig extends ShapeFig {
 		}
 		
 		return super.getProperty(name);
+	}
+
+	@Override
+	public Bounds getBounds() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected void paintImpl(Painter p) {
+		refreshShape();
+		
+		if (shape != null) {
+			p.paint(shape);
+		}
 	}
 
 }

@@ -50,5 +50,10 @@ public class BasicLayer extends AbstractLayer {
 			figure.paint(p);
 		}
 	}
+	
+	@Override
+	public void refresh() {
+		figures.forEach(figure -> figure.refresh());
+	}
 
 }

@@ -26,6 +26,10 @@ public class Painter {
 		apply(g);
 	}
 	
+	public Graphics2D gCopy() {
+		return (Graphics2D) g.create();
+	}
+	
 	private void apply(Graphics2D g) {
 		double zoom = canvas.getZoom();
 		CoordSystem coordSystem = canvas.getCoordSystem();
@@ -36,7 +40,12 @@ public class Painter {
 		g.translate(-canvas.getLeft(), -canvas.getTop());
 		
 		pushStyle(BasicStyle.dashedLine(false, Color.BLACK));
-		paint(canvas.getBounds().toRectangle());
+
+		Bounds canvasBounds = canvas.getBounds();
+		
+		if (canvasBounds != null) {
+			paint(canvasBounds.toRectangle());
+		}
 	}
 	
 	public void pushStyle(Style style) {

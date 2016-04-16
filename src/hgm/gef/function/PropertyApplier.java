@@ -26,7 +26,7 @@ public class PropertyApplier<F, T> extends Applier<F, T> {
 		return sourceName;
 	}
 	
-	public FPropertyLink<F, T> toLink() {
+	public FPropertyLink<F, T> link() {
 		return new FPropertyLink<F, T>(sourceOwner, sourceName, this);
 	}
 	

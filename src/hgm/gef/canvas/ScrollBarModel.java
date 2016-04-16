@@ -62,7 +62,6 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 	}
 
 	public void refresh() {
-		System.out.println("refresh : "+refreshing);
 //		if (refreshing) {
 //			return;
 //		}
@@ -182,7 +181,6 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 	}
 	
 	public void applyToCanvas() {
-		System.out.println("applyToCanvas : "+adjusting+" "+applying+" "+refreshing);
 		
 //		if (adjusting) {
 //			return;
@@ -307,18 +305,13 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 
 		double newValue = hMin + (percentage * diff);
 		
-		System.out.println("newValue1 : "+newValue);
 		newValue = canvas.wScreenToModel(newValue);
-		System.out.println("newValue2 : "+newValue);
 		newValue = coordSystem.vertical(newValue);
-		System.out.println("newValue : "+newValue);
 		
 		adjustOffset(0.0, newValue);
 	}
 
 	public void adjust(int d) {
-		System.out.println("adjust : "+adjusting+" "+d);
-
 		if (horizontal) {
 			double diff = canvas.wScreenToModel(canvas.getScreenWidth()) * d / canvas.getScreenWidth();
 			adjustOffset(diff, 0.0);

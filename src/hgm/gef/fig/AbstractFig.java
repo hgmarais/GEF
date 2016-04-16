@@ -44,15 +44,6 @@ public abstract class AbstractFig implements Fig {
 	}
 	
 	@Override
-	public void setProperty(String name, Object value) {
-	}
-	
-	@Override
-	public Object getProperty(String name) {
-		return null;
-	}
-	
-	@Override
 	public final void paint(Painter p) {
 		p.pushStyle(style);
 		

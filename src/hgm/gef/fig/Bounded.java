@@ -14,7 +14,7 @@ public interface Bounded extends PropertyOwner {
 			return getBounds();
 		}
 		
-		return null;
+		return PropertyOwner.super.getProperty(name);
 	}
 	
 	default boolean contains(double mx, double my) {

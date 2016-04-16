@@ -19,7 +19,7 @@ public class AxisLayer extends AbstractLayer {
 	
 	public AxisLayer(Axis axis) {
 		this.axis = axis;
-		style = BasicStyle.line(false, Color.BLACK);
+		style = BasicStyle.line(false, Color.RED);
 	}
 
 	@Override

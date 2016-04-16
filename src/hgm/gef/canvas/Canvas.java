@@ -37,17 +37,17 @@ public class Canvas implements PropertyOwner {
 	
 	private Bounds mCanvasBounds = new Bounds(0, 0, 0, 0);
 	
-	private double mLeft = 0.0;
-	
-	private double mTop = 0.0;
+//	private double mLeft = 0.0;
+//	
+//	private double mTop = 0.0;
 	
 	private CoordSystem coordSystem;
 	
-	private int sWidth;
-	
-	private int sHeight;
-	
-	private double zoom = 1.0;
+//	private int sWidth;
+//	
+//	private int sHeight;
+//	
+//	private double zoom = 1.0;
 	
 	private double xPixelsPerModel = 1.0;
 	
@@ -67,6 +67,11 @@ public class Canvas implements PropertyOwner {
 		this.coordSystem = coordSystem;
 		layerManager = new LayerManager(this);
 		selectionManager = new SelectionManager(this);
+		setProperty(ZOOM, 1.0);
+		setProperty(LEFT, 0.0);
+		setProperty(TOP, 0.0);
+		setProperty(SCREEN_WIDTH, 1);
+		setProperty(SCREEN_HEIGHT, 1);
 	}
 	
 	@Override
@@ -119,7 +124,7 @@ public class Canvas implements PropertyOwner {
 	}
 	
 	public void setBounds(Bounds mBounds) {
-		if (mCanvasBounds.equals(mBounds)) {
+		if ((mBounds == null) || mCanvasBounds.equals(mBounds)) {
 			return;
 		}
 		
@@ -138,34 +143,42 @@ public class Canvas implements PropertyOwner {
 	}
 	
 	public void setScreenSize(int sWidth, int sHeight) {
-		System.out.println("setScreenSize : "+sWidth+" "+sHeight+" "+getVisibleBounds());
+		int sw = getScreenWidth();
+		int sh = getScreenHeight();
 		
-		if ((this.sWidth == sWidth) && (this.sHeight == sHeight)) {
-			System.out.println("return");
+		if ((sw == sWidth) && (sh == sHeight)) {
 			return;
 		}
 		
-		this.sWidth = sWidth;
-		this.sHeight = sHeight;
+		setProperty(SCREEN_WIDTH, sWidth);
+		setProperty(SCREEN_HEIGHT, sHeight);
 		
 		fireVisibleBoundsChanged();
 		applyBehaviours();
 	}
 	
 	public int getScreenWidth() {
-		return sWidth;
+		return (Integer)getProperty(SCREEN_WIDTH);
 	}
 	
 	public int getScreenHeight() {
-		return sHeight;
+		return (Integer)getProperty(SCREEN_HEIGHT);
+	}
+	
+	public void setLeft(double mLeft) {
+		setOffset(mLeft, getTop());
+	}
+	
+	public void setTop(double mTop) {
+		setOffset(getLeft(), mTop);
 	}
 	
 	public double getLeft() {
-		return mLeft;
+		return (Double)getProperty(LEFT);
 	}
 	
 	public double getTop() {
-		return mTop;
+		return (Double)getProperty(TOP);
 	}
 	
 	public Bounds getBounds() {
@@ -173,6 +186,8 @@ public class Canvas implements PropertyOwner {
 	}
 	
 	public Bounds getVisibleBounds() {
+		double mLeft = getLeft();
+		double mTop = getTop();
 		return new Bounds(mLeft, mTop, mLeft + wScreenToModel(getScreenWidth()), mTop + hScreenToModel(getScreenHeight()));
 	}
 	
@@ -235,11 +250,12 @@ public class Canvas implements PropertyOwner {
 	}
 
 	public void adjustOffset(double mx, double my) {
-		setOffset(mLeft + coordSystem.horizontal(mx), mTop + coordSystem.vertical(my));
+		setOffset(getLeft() + coordSystem.horizontal(mx), getTop() + coordSystem.vertical(my));
 	}
 	
 	public void setOffset(double mx, double my) {
-		System.out.println("setOffset : "+mx+" "+my+" "+getVisibleBounds());
+		double mLeft = getLeft();
+		double mTop = getTop();
 		
 		if ((mLeft == mx) && (mTop == my)) {
 			return;
@@ -248,18 +264,17 @@ public class Canvas implements PropertyOwner {
 		double dx = mx - mLeft;
 		double dy = my - mTop;
 		
-		mLeft = mx;
-		mTop = my;
+		setProperty(LEFT, mx);
+		setProperty(TOP, my);
 		
-		firePropertyChanged(LEFT);
-		firePropertyChanged(TOP);
 		fireOffsetChanged(dx, dy);
 		fireVisibleBoundsChanged();
 		applyBehaviours();
 	}
 	
 	public void setZoom(double zoom) {
-		if (this.zoom == zoom) {
+		double currentZoom = getZoom();
+		if (currentZoom == zoom) {
 			return;
 		}
 		
@@ -270,15 +285,15 @@ public class Canvas implements PropertyOwner {
 	}
 	
 	public void adjustZoom(double dz) {
-		setZoom(zoom + dz);
+		setZoom(getZoom() + dz);
 	}
 	
 	public void adjustZoomAround(double dz, double mx, double my) {
-		setZoomAround(zoom + dz, mx, my);
+		setZoomAround(getZoom() + dz, mx, my);
 	}
 	
 	public double getZoom() {
-		return zoom;
+		return (Double)getProperty(ZOOM);
 	}
 	
 	public void setZoomAroundVisibleCenter(double zoom) {
@@ -302,11 +317,11 @@ public class Canvas implements PropertyOwner {
 	}
 	
 	public double xScreenPerModel() {
-		return xPixelToModel(1) * zoom;
+		return xPixelToModel(1) * getZoom();
 	}
 	
 	public double yScreenPerModel() {
-		return yPixelToModel(1) * zoom;
+		return yPixelToModel(1) * getZoom();
 	}
 	
 	public double xModelPerScreen() {
@@ -318,11 +333,23 @@ public class Canvas implements PropertyOwner {
 	}
 	
 	public double xModelToScreen(double m) {
-		return coordSystem.horizontal((m - mLeft) / xModelPerScreen());
+		return coordSystem.horizontal((m - getLeft()) / xModelPerScreen());
 	}
 	
 	public double wModelToScreen(double m) {
 		return m * xScreenPerModel();
+	}
+		
+	public double hModelToScreen(double m) {
+		return m * yScreenPerModel();
+	}
+	
+	public double wPixelToModel(double p) {
+		return p / xPixelsPerModel;
+	}
+	
+	public double hPixelToModel(double p) {
+		return p / yPixelsPerModel;
 	}
 	
 	public double wScreenToModel(double s) {
@@ -333,20 +360,16 @@ public class Canvas implements PropertyOwner {
 		return s * yModelPerScreen();
 	}
 	
-	public double hModelToScreen(double m) {
-		return m * yScreenPerModel();
-	}
-	
 	public double yModelToScreen(double m) {
-		return coordSystem.vertical((m - mTop) / yModelPerScreen());
+		return coordSystem.vertical((m - getTop()) / yModelPerScreen());
 	}
 	
 	public double xScreenToModel(double s) {
-		return mLeft + (coordSystem.horizontal(s) * xModelPerScreen());
+		return getLeft() + (coordSystem.horizontal(s) * xModelPerScreen());
 	}
 	
 	public double yScreenToModel(double s) {
-		return mTop + (coordSystem.vertical(s) * yModelPerScreen());
+		return getTop() + (coordSystem.vertical(s) * yModelPerScreen());
 	}
 	
 	public double xModelToPixel(double m) {
@@ -437,14 +460,14 @@ public class Canvas implements PropertyOwner {
 	public void zoomFitVertical(double mHeight) {
 		if (mHeight > 0.0) {
 			Bounds mBounds = getVisibleBounds();
-			setZoom(zoom * mBounds.getHeight() / mHeight);
+			setZoom(getZoom() * mBounds.getHeight() / mHeight);
 		}
 	}
 	
 	public void zoomFitHorizontal(double mWidth) {
 		if (mWidth > 0.0) {
 			Bounds mBounds = getVisibleBounds();
-			setZoom(zoom * mBounds.getWidth() / mWidth);
+			setZoom(getZoom() * mBounds.getWidth() / mWidth);
 		}
 	}
 
@@ -464,50 +487,6 @@ public class Canvas implements PropertyOwner {
 		applyBehaviours();		
 	}
 
-	@Override
-	public void setProperty(String name, Object value) {
-		switch (name) {
-		case ZOOM:
-			zoom = ((Number) value).doubleValue();
-			break;
-		case LEFT:
-			mLeft = ((Number) value).doubleValue();
-			fireCanvasBoundsChanged();
-			break;
-		case TOP:
-			mTop = ((Number) value).doubleValue();
-			fireCanvasBoundsChanged();
-			break;
-		case SCREEN_WIDTH:
-			sWidth = ((Number) value).intValue();
-			fireVisibleBoundsChanged();
-			break;
-		case SCREEN_HEIGHT:
-			sHeight = ((Number) value).intValue();
-			fireVisibleBoundsChanged();
-			break;
-//		case MOUSE_POSITION:
-		default: break;
-		}
-		
-		firePropertyChanged(name);
-	}
-
-	@Override
-	public Object getProperty(String name) {
-		switch (name) {
-		case ZOOM: return zoom;
-		case LEFT: return mLeft;
-		case TOP: return mTop;
-		case SCREEN_WIDTH: return sWidth;
-		case SCREEN_HEIGHT: return sHeight;
-		case MOUSE_POSITION: return mousePosition;
-		default: break;
-		}
-		
-		return null;
-	}
-
 	public Function<Point2D, Point2D> pointScreenToModel() {
 		return (s) -> {
 			if (s == null) {
@@ -517,20 +496,87 @@ public class Canvas implements PropertyOwner {
 		};
 	}
 
-	public double xConvertToModel(double x, Unit unit) {
-		if ((unit == null) || (unit == Unit.MODEL)) {
+	public double xToModel(double x, Unit unit) {
+		if (unit == null) {
 			return x;
 		}
 		
-		return xScreenToModel(x);
+		switch (unit) {
+		case MODEL: return x;
+		case PIXEL: return xPixelToModel(x);
+		case SCREEN: return xScreenToModel(x);
+		}
+		
+		return x;
 	}
 	
-	public double yConvertToModel(double y, Unit unit) {
-		if ((unit == null) || (unit == Unit.MODEL)) {
+	public double yToModel(double y, Unit unit) {
+		if (unit == null) {
 			return y;
 		}
 		
-		return yScreenToModel(y);
+		switch (unit) {
+		case MODEL: return y;
+		case PIXEL: return yPixelToModel(y);
+		case SCREEN: return yScreenToModel(y);
+		}
+		
+		return y;
+	}
+	
+	public double wToModel(double w, Unit unit) {
+		if (unit == null) {
+			return w;
+		}
+		
+		switch (unit) {
+		case MODEL: return w;
+		case PIXEL: return wPixelToModel(w);
+		case SCREEN: return wScreenToModel(w);
+		}
+		
+		return w;
+	}
+	
+	public double hToModel(double h, Unit unit) {
+		if (unit == null) {
+			return h;
+		}
+		
+		switch (unit) {
+		case MODEL: return h;
+		case PIXEL: return hPixelToModel(h);
+		case SCREEN: return hScreenToModel(h);
+		}
+		
+		return h;
+	}
+	
+	public double xRelative(double x, Unit xUnit, double dx, Unit dxUnit) {
+		double mx = xToModel(x, xUnit);
+		double mdx = wToModel(dx, dxUnit);
+		return mx + mdx;
+	}
+	
+	public double yRelative(double y, Unit yUnit, double dy, Unit dyUnit) {
+		double my = yToModel(y, yUnit);
+		double mdy = hToModel(dy, dyUnit);
+		return my + mdy;
+	}
+	
+	@Override
+	public void propertyChanged(String name) {
+		switch (name) {
+		case ZOOM:
+		case LEFT:
+		case TOP:
+		case SCREEN_WIDTH:
+		case SCREEN_HEIGHT:
+			fireVisibleBoundsChanged();
+			return;
+		}
+
+		PropertyOwner.super.propertyChanged(name);
 	}
 
 }

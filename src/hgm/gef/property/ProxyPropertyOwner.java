@@ -11,9 +11,13 @@ public class ProxyPropertyOwner implements PropertyOwner {
 	
 	private PropertyOwner owner;
 
-	private Map<String, Unit> propertyUnitMap = new HashMap<>(0);
+	private Map<String, Unit> unitMap = new HashMap<>();
 	
-	private LinkedList<PropertyListener> propertyListeners = new LinkedList<>();
+	private Map<String, Object> valueMap = new HashMap<>();
+	
+	private Map<String, Constraint> constraintMap = new HashMap<>();
+	
+	private LinkedList<PropertyListener> listeners = new LinkedList<>();
 	
 	public ProxyPropertyOwner(PropertyOwner owner) {
 		this.owner = owner;
@@ -26,12 +30,26 @@ public class ProxyPropertyOwner implements PropertyOwner {
 
 	@Override
 	public List<PropertyListener> getPropertyListeners() {
-		return propertyListeners;
+		return listeners;
 	}
 
 	@Override
 	public Map<String, Unit> getPropertyUnitMap() {
-		return propertyUnitMap;
+		return unitMap;
+	}
+	
+	@Override
+	public Map<String, Object> getPropertyValueMap() {
+		return valueMap;
+	}
+	
+	@Override
+	public Map<String, Constraint> getPropertyConstraintMap() {
+		return constraintMap;
+	}
+	
+	@Override
+	public void propertyChanged(String name) {
 	}
 
 }

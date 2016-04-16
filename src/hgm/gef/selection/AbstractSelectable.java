@@ -42,5 +42,5 @@ public abstract class AbstractSelectable implements Selectable {
 	public Bounds getBounds() {
 		return figure.getBounds();
 	}
-
+	
 }

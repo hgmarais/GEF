@@ -14,8 +14,37 @@ public interface PropertyOwner {
 		return getPropertyOwner().getPropertyListeners();
 	}
 	
+	default Map<String, Object> getPropertyValueMap() {
+		return getPropertyOwner().getPropertyValueMap();
+	}
+	
 	default Map<String, Unit> getPropertyUnitMap() {
 		return getPropertyOwner().getPropertyUnitMap();
+	}
+	
+	default Map<String, Constraint> getPropertyConstraintMap() {
+		return getPropertyOwner().getPropertyConstraintMap();
+	}
+	
+	default Object constrainProperty(String name, Object value) {
+		Constraint constraint = getPropertyConstraintMap().get(name);
+		
+		if (constraint == null) {
+			return value;
+		}
+		
+		return constraint.constrain(value);
+	}
+	
+	default void setPropertyConstraint(String name, Constraint constraint) {
+		Map<String, Constraint> map = getPropertyConstraintMap(); 
+		
+		if (constraint == null) {
+			map.remove(name);
+		} else {
+			map.put(name, constraint);
+			
+		}
 	}
 	
 	default PropertySupplier<?> getPropertySupplier(String name) {
@@ -27,6 +56,8 @@ public interface PropertyOwner {
 	}
 	
 	default void setProperty(String name, Object value) {
+		getPropertyValueMap().put(name, constrainProperty(name, value));
+		firePropertyChanged(name);
 	}
 	
 	default void setProperty(String name, Object value, Unit unit) {
@@ -35,7 +66,7 @@ public interface PropertyOwner {
 	}
 	
 	default Object getProperty(String name) {
-		return null;
+		return getPropertyValueMap().get(name);
 	}
 	
 	default void setPropertyUnit(String name, Unit unit) {
@@ -67,9 +98,14 @@ public interface PropertyOwner {
 	}
 	
 	default void firePropertyChanged(String name) {
+		propertyChanged(name);
 		for (PropertyListener listener : getPropertyListeners()) {
 			listener.propertyChanged(getPropertyOwner(), name);
 		}
+	}
+	
+	default void propertyChanged(String name) {
+		getPropertyOwner().propertyChanged(name);
 	}
 	
 }

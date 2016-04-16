@@ -349,8 +349,6 @@ public class CanvasPanel extends JPanel implements CanvasListener, PropertyListe
 	}
 	
 	private void refreshScrollBars() {
-		System.out.println("refreshScrollBars");
-		
 		hBarModel.refresh();
 		vBarModel.refresh();
 		

@@ -100,4 +100,8 @@ public abstract class AbstractLayer implements Layer {
 		return false;
 	}
 	
+	@Override
+	public void propertyChanged(String name) {
+	}
+	
 }

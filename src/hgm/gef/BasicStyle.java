@@ -54,13 +54,21 @@ public class BasicStyle implements Style {
 		
 		width /= zoom;
 		phase /= zoom;
-		dash = Arrays.copyOf(dash, dash.length);
 		
-		for (int i = 0; i < dash.length; i++) {
-			dash[i] /= zoom;
+		BasicStroke newStroke;
+		
+		if (dash != null) {
+			dash = Arrays.copyOf(dash, dash.length);
+			
+			for (int i = 0; i < dash.length; i++) {
+				dash[i] /= zoom;
+			}
+		
+			newStroke = new BasicStroke(width, stroke.getEndCap(), stroke.getLineJoin(), miter, dash, phase);
+		} else {
+			newStroke = new BasicStroke(width, stroke.getEndCap(), stroke.getLineJoin(), miter);
 		}
 		
-		BasicStroke newStroke = new BasicStroke(width, stroke.getEndCap(), stroke.getLineJoin(), miter, dash, phase);
 		return new BasicStyle(newStroke, strokeColor, fillPaint);
 	}
 

@@ -7,6 +7,8 @@ import java.util.List;
 
 import hgm.gef.Style;
 import hgm.gef.fig.Bounds;
+import hgm.gef.fig.LayerFig;
+import hgm.gef.layer.Layer;
 import hgm.gef.layer.LayerManager;
 import hgm.gef.selection.SelectionManager;
 
@@ -22,8 +24,6 @@ public class Canvas {
 	
 	private double mTop = 0.0;
 	
-	private LinkedList<CanvasListener> listeners = new LinkedList<>();
-	
 	private CoordSystem coordSystem;
 	
 	private int sWidth;
@@ -36,20 +36,47 @@ public class Canvas {
 	
 	private double yPixelsPerModel = 1.0;
 	
+	private boolean applyingBehaviours = false;
+	
+	private List<Behaviour> behaviours = new LinkedList<>();
+	
+	private LinkedList<CanvasListener> listeners = new LinkedList<>();
+	
 	public Canvas(CoordSystem coordSystem) {
 		this.coordSystem = coordSystem;
 		layerManager = new LayerManager(this);
 		selectionManager = new SelectionManager(this);
 	}
 	
+	public void addBehaviour(Behaviour behaviour) {
+		behaviours.add(behaviour);
+		applyBehaviours();
+	}
+	
+	public void applyBehaviours() {
+		if (applyingBehaviours) {
+			return;
+		}
+		
+		applyingBehaviours = true;
+		
+		try {
+			behaviours.forEach(b -> b.apply(this));
+		} finally {
+			applyingBehaviours = false;
+		}
+	}
+	
 	public void setXPixelsPerModel(double xPixelsPerModel) {
 		this.xPixelsPerModel = xPixelsPerModel;
 		fireConverterChanged();
+		applyBehaviours();
 	}
 	
 	public void setYPixelsPerModel(double yPixelsPerModel) {
 		this.yPixelsPerModel = yPixelsPerModel;
 		fireConverterChanged();
+		applyBehaviours();
 	}
 	
 	
@@ -66,14 +93,28 @@ public class Canvas {
 	}
 	
 	public void setBounds(Bounds mBounds) {
+		if (mCanvasBounds.equals(mBounds)) {
+			return;
+		}
+		
 		mCanvasBounds = mBounds;
 		fireCanvasBoundsChanged();
+		applyBehaviours();
 	}
-
+	
 	public void setScreenSize(int sWidth, int sHeight) {
+		System.out.println("setScreenSize : "+sWidth+" "+sHeight+" "+getVisibleBounds());
+		
+		if ((this.sWidth == sWidth) && (this.sHeight == sHeight)) {
+			System.out.println("return");
+			return;
+		}
+		
 		this.sWidth = sWidth;
 		this.sHeight = sHeight;
+		
 		fireVisibleBoundsChanged();
+		applyBehaviours();
 	}
 	
 	public int getScreenWidth() {
@@ -97,9 +138,35 @@ public class Canvas {
 	}
 	
 	public Bounds getVisibleBounds() {
-		double width = coordSystem.horizontal(sWidth) * xModelPerScreen();
-		double height = coordSystem.vertical(sHeight) * yModelPerScreen();
-		return new Bounds(mLeft, mTop, mLeft + width, mTop + height);
+		return new Bounds(mLeft, mTop, mLeft + wScreenToModel(getScreenWidth()), mTop + hScreenToModel(getScreenHeight()));
+	}
+	
+	public Point2D getVisibleCenter() {
+		return getVisibleBounds().getCenter();
+	}
+	
+	public void setVisibleCenter(Point2D mPoint) {
+		setVisibleCenter(mPoint.getX(), mPoint.getY());
+	}
+	
+	public void setVisibleCenter(Double mx, Double my) {
+		Point2D center = getVisibleCenter();
+		double dx = 0.0;
+		double dy = 0.0;
+		
+		if (mx != null) {
+			dx = mx - center.getX();
+		}
+		
+		if (my != null) {
+			dy = my - center.getY();
+		}
+		
+		adjustOffset(dx, dy);
+	}
+	
+	public void centerOnOrigin() {
+		setVisibleCenter(0.0, 0.0);
 	}
 	
 	public void zoomFitCanvas() {
@@ -110,7 +177,7 @@ public class Canvas {
 		zoomFit(layerManager.getBounds());
 	}
 
-	private void zoomFit(Bounds mb) {
+	public void zoomFit(Bounds mb) {
 		if (mb == null) {
 			return;
 		}
@@ -137,15 +204,34 @@ public class Canvas {
 	}
 	
 	public void setOffset(double mx, double my) {
+		System.out.println("setOffset : "+mx+" "+my+" "+getVisibleBounds());
+		
+		if ((mLeft == mx) && (mTop == my)) {
+			return;
+		}
+		
+		double dx = mx - mLeft;
+		double dy = my - mTop;
+		
 		mLeft = mx;
 		mTop = my;
+		
+		fireOffsetChanged(dx, dy);
 		fireVisibleBoundsChanged();
+		applyBehaviours();
 	}
 	
 	public void setZoom(double zoom) {
+		System.out.println("setZoom : "+zoom+" "+getVisibleBounds());
+		
+		if (this.zoom == zoom) {
+			return;
+		}
+		
 		if (zoom > 0.0) {
 			this.zoom = zoom;
 			fireZoomChanged();
+			applyBehaviours();
 		}
 	}
 	
@@ -209,6 +295,10 @@ public class Canvas {
 		return s * xModelPerScreen();
 	}
 	
+	public double hScreenToModel(double s) {
+		return s * yModelPerScreen();
+	}
+	
 	public double hModelToScreen(double m) {
 		return m * yScreenPerModel();
 	}
@@ -243,37 +333,43 @@ public class Canvas {
 	
 	private void fireConverterChanged() {
 		for (CanvasListener listener : cloneListeners()) {
-			listener.converterChanged();
+			listener.converterChanged(this);
 		}
 	}
 	
 	private void fireZoomChanged() {
 		for (CanvasListener listener : cloneListeners()) {
-			listener.zoomChanged();
+			listener.zoomChanged(this);
+		}
+	}
+	
+	private void fireOffsetChanged(double dx, double dy) {
+		for (CanvasListener listener : cloneListeners()) {
+			listener.offsetChanged(this, dx, dy);
 		}
 	}
 	
 	private void fireVisibleBoundsChanged() {
 		for (CanvasListener listener : cloneListeners()) {
-			listener.visibleBoundsChanged();
+			listener.visibleBoundsChanged(this);
 		}
 	}
 	
 	private void fireCanvasBoundsChanged() {
 		for (CanvasListener listener : cloneListeners()) {
-			listener.boundsChanged();
+			listener.boundsChanged(this);
 		}
 	}
 	
 	private void fireRepaintRequested() {
 		for (CanvasListener listener : cloneListeners()) {
-			listener.repaintRequested();
+			listener.repaintRequested(this);
 		}
 	}
 	
 	private void fireRepaintRequested(Bounds mb) {
 		for (CanvasListener listener : cloneListeners()) {
-			listener.repaintRequested(mb);
+			listener.repaintRequested(this, mb);
 		}		
 	}
 	
@@ -302,6 +398,36 @@ public class Canvas {
 		Painter painter = new Painter(this, g, style);
 		layerManager.paint(painter);
 		selectionManager.paint(painter);
+	}
+
+	public void zoomFitVertical(double mHeight) {
+		if (mHeight > 0.0) {
+			Bounds mBounds = getVisibleBounds();
+			setZoom(zoom * mBounds.getHeight() / mHeight);
+		}
+	}
+	
+	public void zoomFitHorizontal(double mWidth) {
+		if (mWidth > 0.0) {
+			Bounds mBounds = getVisibleBounds();
+			setZoom(zoom * mBounds.getWidth() / mWidth);
+		}
+	}
+
+	public void figureAdded(Layer layer, LayerFig figure) {
+		applyBehaviours();
+	}
+
+	public void figureRemoved(Layer layer, LayerFig figure) {
+		applyBehaviours();		
+	}
+
+	public void layerAdded(Layer layer) {
+		applyBehaviours();		
+	}
+	
+	public void layerRemoved(Layer layer) {
+		applyBehaviours();		
 	}
 
 }

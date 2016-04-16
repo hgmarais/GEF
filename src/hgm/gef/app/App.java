@@ -8,17 +8,17 @@ import java.awt.geom.Line2D;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import hgm.gef.BasicStyle;
+import hgm.gef.canvas.Axis;
 import hgm.gef.canvas.Canvas;
 import hgm.gef.canvas.CanvasPanel;
-import hgm.gef.canvas.CartesianCoordSystem;
 import hgm.gef.canvas.CoordSystem;
 import hgm.gef.canvas.ScreenCoordSystem;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.ShapeFig;
-import hgm.gef.layer.DefaultLayer;
+import hgm.gef.layer.AxisLayer;
+import hgm.gef.layer.BasicLayer;
 import hgm.gef.layer.LayerManager;
 
 public class App {
@@ -40,7 +40,8 @@ public class App {
 		xLine.setStyle(BasicStyle.dashedLine(false, Color.MAGENTA));
 		yLine.setStyle(BasicStyle.dashedLine(false, Color.CYAN));
 		
-		DefaultLayer layer = new DefaultLayer();
+		BasicLayer layer = new BasicLayer();
+		AxisLayer axisLayer = new AxisLayer(Axis.BOTH);
 		
 		layer.addFigure(xLine);
 		layer.addFigure(yLine);
@@ -50,25 +51,44 @@ public class App {
 		layer.addFigure(fig4);
 		
 		Canvas canvas = new Canvas(coordSystem);
-		canvas.setBounds(new Bounds(0, 0, 400, 400));
+		canvas.setBounds(new Bounds(-400, -400, 400, 400));
+//		canvas.centerOnOrigin();
 		
 		LayerManager layerManager = canvas.getLayerManager();
 		layerManager.addToTop(layer);
+		layerManager.addToBottom(axisLayer);
 		
 		return new CanvasPanel(canvas);
 	}
 
 	public static void main(String[] args) {
-		JPanel canvasPanel = new JPanel(new GridLayout(1, 2));
+		JPanel canvasPanel = new JPanel(new BorderLayout());
 		JPanel controlPanel = new JPanel(new GridLayout(1, 2));
 		
-		CanvasPanel canvasPanel1 = createCanvasPanel(new ScreenCoordSystem());
-		canvasPanel.add(canvasPanel1);
-		controlPanel.add(new ControlPanel(canvasPanel1));
+//		CanvasPanel xPanel = createCanvasPanel(new ScreenCoordSystem());
+//		canvasPanel.add(xPanel, BorderLayout.SOUTH);
+//		CanvasPanel yPanel = createCanvasPanel(new ScreenCoordSystem());
+//		canvasPanel.add(yPanel, BorderLayout.WEST);
+//	Canvas xCanvas = xPanel.getCanvas();
+//	Canvas yCanvas = yPanel.getCanvas();
+//		CanvasGroup canvasGroup = new CanvasGroup();
+//		canvasGroup.addOffsetLink(true, Axis.HORIZONTAL, xCanvas, pCanvas);
+//		canvasGroup.addOffsetLink(true, Axis.VERTICAL, yCanvas, pCanvas);
+//		canvasGroup.addZoomLink(xCanvas, pCanvas);
+//		canvasGroup.addZoomLink(yCanvas, pCanvas);
+//
+//		xPanel.setBackground(Color.GRAY);
+//		yPanel.setBackground(Color.GRAY);
+//		xPanel.setScrollable(false);
+//		yPanel.setScrollable(false);
+//		xPanel.setScrollBarPolicy(ScrollBarPolicy.HIDDEN);
+//		yPanel.setScrollBarPolicy(ScrollBarPolicy.HIDDEN);
 		
-		CanvasPanel canvasPanel2 = createCanvasPanel(new CartesianCoordSystem());
-		canvasPanel.add(canvasPanel2);
-		controlPanel.add(new ControlPanel(canvasPanel2));
+		CanvasPanel plotPanel = createCanvasPanel(new ScreenCoordSystem());
+		canvasPanel.add(plotPanel, BorderLayout.CENTER);
+		controlPanel.add(new ControlPanel(plotPanel));
+
+//		Canvas pCanvas = plotPanel.getCanvas();
 		
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(canvasPanel, BorderLayout.CENTER);
@@ -81,13 +101,6 @@ public class App {
 		frame.setLocation(500, 0);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-		
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-//				canvasPanel1.getCanvas().zoomFitCanvas();
-//				canvasPanel2.getCanvas().zoomFitCanvas();
-			}
-		});
 	}
 
 }

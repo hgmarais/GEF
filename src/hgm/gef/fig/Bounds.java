@@ -12,7 +12,7 @@ public class Bounds {
 	private double maxX;
 	
 	private double maxY;
-
+	
 	public Bounds(Rectangle2D r) {
 		minX = r.getMinX();
 		minY = r.getMinY();
@@ -92,8 +92,19 @@ public class Bounds {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Bounds)) {
+			return false;
+		}
+		
+		Bounds b = (Bounds) obj;
+		
+		return getMin().equals(b.getMin()) && getMax().equals(b.getMax());
+	}
+	
+	@Override
 	public String toString() {
-		return String.format("%.2f, %.2f - %.2f, %.2f", getMinX(), getMinY(), getMaxX(), getMaxY());
+		return String.format("%.2f, %.2f - %.2f, %.2f (%.2f x %.2f)", getMinX(), getMinY(), getMaxX(), getMaxY(), getWidth(), getHeight());
 	}
 
 }

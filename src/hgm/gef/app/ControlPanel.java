@@ -66,8 +66,6 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 		createComponents();
 		layoutComponents();
 		
-		refreshZoom();
-		refreshBounds();
 		canvas.addListener(this);
 		canvasPanel.getViewportPanel().addMouseMotionListener(this);
 	}
@@ -91,6 +89,9 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 				canvas.setBounds(getChosenBounds());
 			}
 		};
+		
+		refreshZoom();
+		refreshBounds();
 		
 		x1Model.addChangeListener(changeListener);
 		y1Model.addChangeListener(changeListener);
@@ -175,25 +176,25 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 	}
 
 	@Override
-	public void boundsChanged() {
+	public void boundsChanged(Canvas source) {
 		refreshBounds();
 	}
 
 	@Override
-	public void zoomChanged() {
+	public void zoomChanged(Canvas source) {
 		refreshZoom();
 	}
 
 	@Override
-	public void visibleBoundsChanged() {
+	public void visibleBoundsChanged(Canvas source) {
 	}
 
 	@Override
-	public void repaintRequested() {
+	public void repaintRequested(Canvas source) {
 	}
 
 	@Override
-	public void repaintRequested(Bounds mb) {
+	public void repaintRequested(Canvas source, Bounds mb) {
 	}
 
 	@Override
@@ -208,7 +209,11 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 	}
 
 	@Override
-	public void converterChanged() {
+	public void converterChanged(Canvas source) {
+	}
+
+	@Override
+	public void offsetChanged(Canvas canvas, double dx, double dy) {
 		// TODO Auto-generated method stub
 		
 	}

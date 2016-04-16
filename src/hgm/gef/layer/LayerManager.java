@@ -25,6 +25,15 @@ public class LayerManager implements Bounded, Paintable {
 		this.canvas = canvas;
 	}
 	
+	@Override
+	public Bounds getBounds() {
+		return GEFUtil.addBounds(layers);
+	}
+	
+	public Canvas getCanvas() {
+		return canvas;
+	}
+	
 	public void addToTop(Layer layer) {
 		add(0, layer);
 	}
@@ -42,6 +51,7 @@ public class LayerManager implements Bounded, Paintable {
 		
 		layers.add(index, layer);
 		layer.setLayerManager(this);
+		canvas.layerAdded(layer);
 		fireLayerAdded(layer);
 		repaint();
 	}
@@ -49,6 +59,7 @@ public class LayerManager implements Bounded, Paintable {
 	public void remove(Layer layer) {
 		if (layers.remove(layer)) {
 			layer.setLayerManager(null);
+			canvas.layerRemoved(layer);
 			fireLayerRemoved(layer);
 			repaint();
 		}
@@ -110,6 +121,14 @@ public class LayerManager implements Bounded, Paintable {
 	
 	public Point2D getCorner2() {
 		return GEFUtil.getMaxCorner(layers);
+	}
+
+	public void figureAdded(Layer layer, LayerFig figure) {
+		canvas.figureAdded(layer, figure);
+	}
+	
+	public void figureRemoved(Layer layer, LayerFig figure) {
+		canvas.figureRemoved(layer, figure);
 	}
 
 }

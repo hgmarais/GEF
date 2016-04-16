@@ -45,6 +45,12 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	private ScrollBarModel vBarModel;
 	
 	private JPanel corner;
+	
+	private boolean zoomable = true;
+	
+	private boolean hScrollable = true;
+	
+	private boolean vScrollable = true;
 
 	private class ViewportPanel extends JPanel {
 		
@@ -82,6 +88,56 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		setBackground(Color.WHITE);
 	}
 	
+	public void setHorizontalScrollBarPolicy(ScrollBarPolicy policy) {
+		hBarModel.setPolicy(policy);
+		refreshScrollBars();
+	}
+	
+	public void setScrollBarPolicy(ScrollBarPolicy policy) {
+		hBarModel.setPolicy(policy);
+		vBarModel.setPolicy(policy);
+		refreshScrollBars();
+	}
+	
+	public void setScrollBarPolicies(ScrollBarPolicy policy) {
+		setScrollBarPolicies(policy, policy);
+	}
+	
+	public void setZoomable(boolean zoomable) {
+		this.zoomable = zoomable;
+	}
+	
+	public boolean isZoomable() {
+		return zoomable;
+	}
+	
+	public void setHorizontalScrollable(boolean scrollable) {
+		this.hScrollable = scrollable;
+	}
+	
+	public boolean isHorizontalScrollable() {
+		return hScrollable;
+	}
+	
+	public void setVerticalScrollable(boolean scrollable) {
+		this.vScrollable = scrollable;
+	}
+	
+	public boolean isVerticalScrollable() {
+		return vScrollable;
+	}
+	
+	public void setScrollable(boolean scrollable) {
+		setHorizontalScrollable(scrollable);
+		setVerticalScrollable(scrollable);
+	}
+	
+	public void setScrollBarPolicies(ScrollBarPolicy horizontal, ScrollBarPolicy vertical) {
+		hBarModel.setPolicy(horizontal);
+		vBarModel.setPolicy(vertical);
+		refreshScrollBars();
+	}
+	
 	private void createComponents() {
 		viewportPanel = new ViewportPanel();
 		hBar = new JScrollBar(JScrollBar.HORIZONTAL);
@@ -92,22 +148,26 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		vBar.setVisible(false);
 		corner.setVisible(false);
 		
-		hBarModel = new ScrollBarModel(this, true);
-		vBarModel = new ScrollBarModel(this, false);
+		hBarModel = new ScrollBarModel(canvas, true);
+		vBarModel = new ScrollBarModel(canvas, false);
 		hBar.setModel(hBarModel);
 		vBar.setModel(vBarModel);
 		
 		hBar.addAdjustmentListener(new AdjustmentListener() {
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
-				hBarModel.applyToCanvas();
+				if (!e.getValueIsAdjusting()) {
+					hBarModel.applyToCanvas();
+				}
 			}
 		});
 		
 		vBar.addAdjustmentListener(new AdjustmentListener() {
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
-				vBarModel.applyToCanvas();
+				if (!e.getValueIsAdjusting()) {
+					vBarModel.applyToCanvas();
+				}
 			}
 		});
 		
@@ -144,16 +204,16 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	}
 	
 	private void refreshVisibleSize() {
-		int w = getWidth();
-		int h = getHeight();
+		int w = viewportPanel.getWidth();
+		int h = viewportPanel.getHeight();
 		
-		if (hBar.isVisible()) {
-			h -= hBar.getHeight();
-		}
-		
-		if (vBar.isVisible()) {
-			w -= vBar.getWidth();
-		}
+//		if (hBar.isVisible()) {
+//			h -= hBar.getHeight();
+//		}
+//		
+//		if (vBar.isVisible()) {
+//			w -= vBar.getWidth();
+//		}
 		
 		canvas.setScreenSize(w, h);
 	}
@@ -177,12 +237,12 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	}
 	
 	@Override
-	public void repaintRequested() {
+	public void repaintRequested(Canvas source) {
 		repaint();
 	}
 
 	@Override
-	public void repaintRequested(Bounds mb) {
+	public void repaintRequested(Canvas source, Bounds mb) {
 		// TODO : Limit to bounds.
 		repaint();
 	}
@@ -207,9 +267,11 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if (e.isControlDown()) {
-			double mx = canvas.xScreenToModel(e.getX());
-			double my = canvas.yScreenToModel(e.getY());
-			canvas.adjustZoomAround(-e.getPreciseWheelRotation(), mx, my);
+			if (zoomable) {
+				double mx = canvas.xScreenToModel(e.getX());
+				double my = canvas.yScreenToModel(e.getY());
+				canvas.adjustZoomAround(-e.getPreciseWheelRotation(), mx, my);
+			}
 		} else if (e.isAltDown()) {
 //			if (e.isShiftDown()) {
 //				canvas.adjustDimension(-e.getPreciseWheelRotation(), 0.0);
@@ -219,9 +281,26 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		} else {
 			int diff = (int) e.getPreciseWheelRotation();
 			
+			boolean horizontal = false;
+			boolean vertical = false;
+			
 			if (e.isShiftDown()) {
-				hBarModel.adjust(diff);
+				if (hScrollable) {
+					horizontal = true;
+				} else if (vScrollable) {
+					vertical = true;
+				}
 			} else {
+				if (vScrollable) {
+					vertical = true;
+				} else if (hScrollable) {
+					horizontal = true;
+				}
+			}
+			
+			if (horizontal) {
+				hBarModel.adjust(diff);
+			} else if (vertical) {
 				vBarModel.adjust(diff);
 			}
 		}
@@ -258,20 +337,22 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	}
 	
 	@Override
-	public void visibleBoundsChanged() {
+	public void visibleBoundsChanged(Canvas source) {
 		refreshScrollBars();
 		repaint();
 	}
 	
 	private void refreshScrollBars() {
+		System.out.println("refreshScrollBars");
+		
 		hBarModel.refresh();
 		vBarModel.refresh();
-	
-		if ((hBar.isVisible() != hBarModel.requireVisible()) || (vBar.isVisible() != vBarModel.requireVisible())) {
-			hBar.setVisible(hBarModel.requireVisible());
-			vBar.setVisible(vBarModel.requireVisible());
+		
+		if ((hBar.isVisible() != hBarModel.shouldBeShown()) || (vBar.isVisible() != vBarModel.shouldBeShown())) {
+			hBar.setVisible(hBarModel.shouldBeShown());
+			vBar.setVisible(vBarModel.shouldBeShown());
 			
-			corner.setVisible(hBarModel.requireVisible() && vBarModel.requireVisible());
+			corner.setVisible(hBar.isVisible() && vBar.isVisible());
 			corner.setPreferredSize(new Dimension(hBar.getHeight(), vBar.getWidth()));
 		
 			refreshVisibleSize();
@@ -279,19 +360,19 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	}
 	
 	@Override
-	public void boundsChanged() {
+	public void boundsChanged(Canvas source) {
 		refreshScrollBars();
 		repaint();
 	}
 	
 	@Override
-	public void converterChanged() {
+	public void converterChanged(Canvas source) {
 		refreshVisibleSize();
 		repaint();
 	}
 
 	@Override
-	public void zoomChanged() {
+	public void zoomChanged(Canvas source) {
 		refreshVisibleSize();
 		repaint();
 	}
@@ -314,6 +395,12 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
+	}
+
+	@Override
+	public void offsetChanged(Canvas canvas, double dx, double dy) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

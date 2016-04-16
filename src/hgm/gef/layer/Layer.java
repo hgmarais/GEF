@@ -9,9 +9,9 @@ import hgm.gef.fig.LayerFig;
 
 public interface Layer extends Paintable, Bounded {
 	
-	void setLayerManager(LayerManager editor);
+	void setLayerManager(LayerManager layerManager);
 	
-	LayerManager getEditor();
+	LayerManager getLayerManager();
 	
 	void addFigure(LayerFig figure);
 	

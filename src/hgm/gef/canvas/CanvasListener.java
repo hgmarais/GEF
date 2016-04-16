@@ -4,16 +4,18 @@ import hgm.gef.fig.Bounds;
 
 public interface CanvasListener {
 	
-	void boundsChanged();
+	void boundsChanged(Canvas source);
 
-	void zoomChanged();
+	void zoomChanged(Canvas source);
 
-	void visibleBoundsChanged();
+	void visibleBoundsChanged(Canvas source);
 
-	void repaintRequested();
+	void repaintRequested(Canvas source);
 
-	void repaintRequested(Bounds mb);
+	void repaintRequested(Canvas source, Bounds mb);
 
-	void converterChanged();
+	void converterChanged(Canvas source);
+
+	void offsetChanged(Canvas canvas, double dx, double dy);
 
 }

@@ -31,14 +31,26 @@ public class GEFUtil {
 			return null;
 		}
 		
-		return new Bounds(getMinCorner(list), getMaxCorner(list));
+		Point2D min = getMinCorner(list);
+		
+		if (min == null) {
+			return null;
+		}
+		
+		return new Bounds(min, getMaxCorner(list));
 	}
 
 	public static Point2D getMinCorner(Collection<? extends Bounded> list) {
 		Point2D result = null;
 		
 		for (Bounded b : list) {
-			Point2D corner = getMinCorner(b);
+			Bounds bounds = b.getBounds();
+			
+			if (bounds == null) {
+				continue;
+			}
+			
+			Point2D corner = bounds.getMin();
 			
 			if (result == null) {
 				result = corner;
@@ -54,7 +66,13 @@ public class GEFUtil {
 		Point2D result = null;
 		
 		for (Bounded b : list) {
-			Point2D corner = getMaxCorner(b);
+			Bounds bounds = b.getBounds();
+			
+			if (bounds == null) {
+				continue;
+			}
+			
+			Point2D corner = bounds.getMax();
 			
 			if (result == null) {
 				result = corner;
@@ -64,18 +82,6 @@ public class GEFUtil {
 		}
 		
 		return result;
-	}
-
-	public static Point2D getMinCorner(Bounded b) {
-		Point2D c1 = b.getCorner1();
-		Point2D c2 = b.getCorner2();
-		return new Point2D.Double(Math.min(c1.getX(), c2.getX()), Math.min(c1.getY(), c2.getY()));
-	}
-	
-	public static Point2D getMaxCorner(Bounded b) {
-		Point2D c1 = b.getCorner1();
-		Point2D c2 = b.getCorner2();
-		return new Point2D.Double(Math.max(c1.getX(), c2.getX()), Math.max(c1.getY(), c2.getY()));
 	}
 
 }

@@ -265,55 +265,55 @@ public class ScrollBarModel extends DefaultBoundedRangeModel {
 		int sMax = getMaximum();
 		int sValue = getValue();
 		
-		System.out.println("sMin : "+sMin);
-		System.out.println("sMax : "+sMax);
-		System.out.println("sValue : "+sValue);
-		System.out.println("sExtent : "+getExtent());
+//		System.out.println("sMin : "+sMin);
+//		System.out.println("sMax : "+sMax);
+//		System.out.println("sValue : "+sValue);
+//		System.out.println("sExtent : "+getExtent());
+//		
+//		if (coordSystem.getYDirection() == -1) {
+//			sValue = sMin + (sMax - sValue);
+//		}
+//		
+//		System.out.println("sValue2 : "+sValue);
+//		
+//		double percentage = (double)sValue / (double)(Math.abs(sMax - sMin));
+//		double diff = Math.abs(currentMax - currentMin);
+//		double newValue;
+//		
+//		if (coordSystem.getYDirection() == 1) {
+//			newValue = currentMin + (percentage * diff);
+//		} else { 
+//			newValue = currentMax - (percentage * diff);
+//		}
+//		
+//		adjustOffset(0.0, newValue - currentValue);
+//		
+//		System.out.println("currentMin : "+currentMin);
+//		System.out.println("currentValue : "+currentValue);
+//		System.out.println("newValue : "+newValue);
 		
-		if (coordSystem.getYDirection() == -1) {
-			sValue = sMin + (sMax - sValue);
-		}
+		double percentage = (double)sValue / (double)(Math.abs(sMax - sMin)); 
+		double pvy = canvas.yModelToScreen(mVisibleBounds.getMinY());
+		double pvh = canvas.hModelToScreen(mVisibleBounds.getHeight());
+		double pcy = canvas.yModelToScreen(mCanvasBounds.getMinY());
+		double pch = canvas.hModelToScreen(mCanvasBounds.getHeight());
 		
-		System.out.println("sValue2 : "+sValue);
+		pvy = coordSystem.vertical(pvy);
+		pcy = coordSystem.vertical(pcy);
 		
-		double percentage = (double)sValue / (double)(Math.abs(sMax - sMin));
-		double diff = Math.abs(currentMax - currentMin);
-		double newValue;
+		double hMin = Math.min(pvy, pcy);
+		double hMax = Math.max(pcy + pch, pvy + pvh);
+		double diff = Math.abs(hMax - hMin);
+
+		double newValue = hMin + (percentage * diff);
 		
-		if (coordSystem.getYDirection() == 1) {
-			newValue = currentMin + (percentage * diff);
-		} else { 
-			newValue = currentMax - (percentage * diff);
-		}
-		
-		adjustOffset(0.0, newValue - currentValue);
-		
-		System.out.println("currentMin : "+currentMin);
-		System.out.println("currentValue : "+currentValue);
+		System.out.println("newValue1 : "+newValue);
+		newValue = canvas.wScreenToModel(newValue);
+		System.out.println("newValue2 : "+newValue);
+		newValue = coordSystem.vertical(newValue);
 		System.out.println("newValue : "+newValue);
 		
-//		double percentage = (double)sValue / (double)(Math.abs(sMax - sMin)); 
-//		double pvy = canvas.yModelToScreen(mVisibleBounds.getMinY());
-//		double pvh = canvas.hModelToScreen(mVisibleBounds.getHeight());
-//		double pcy = canvas.yModelToScreen(mCanvasBounds.getMinY());
-//		double pch = canvas.hModelToScreen(mCanvasBounds.getHeight());
-//		
-//		pvy = coordSystem.vertical(pvy);
-//		pcy = coordSystem.vertical(pcy);
-//		
-//		double hMin = Math.min(pvy, pcy);
-//		double hMax = Math.max(pcy + pch, pvy + pvh);
-//		double diff = Math.abs(hMax - hMin);
-//
-//		double newValue = hMin + (percentage * diff);
-//		
-//		System.out.println("newValue1 : "+newValue);
-//		newValue = canvas.wScreenToModel(newValue);
-//		System.out.println("newValue2 : "+newValue);
-//		newValue = coordSystem.vertical(newValue);
-//		System.out.println("newValue : "+newValue);
-//		
-//		adjustOffset(0.0, newValue);
+		adjustOffset(0.0, newValue);
 	}
 
 	public void adjust(int d) {

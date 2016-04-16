@@ -1,14 +1,25 @@
 package hgm.gef.fig;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import hgm.gef.Style;
 import hgm.gef.canvas.Painter;
+import hgm.gef.property.PropertyListener;
 import hgm.gef.selection.Selection;
 
-public abstract class BaseFig implements Fig {
+public abstract class AbstractFig implements Fig {
 	
 	private Style style;
 	
 	private Selection selection;
+	
+	private List<PropertyListener> propertyListeners = new LinkedList<>();
+	
+	@Override
+	public List<PropertyListener> getPropertyListeners() {
+		return propertyListeners;
+	}
 	
 	@Override
 	public void setSelection(Selection selection) {
@@ -32,6 +43,15 @@ public abstract class BaseFig implements Fig {
 		}
 		
 		repaint();
+	}
+	
+	@Override
+	public void setProperty(String name, Object value) {
+	}
+	
+	@Override
+	public Object getProperty(String name) {
+		return null;
 	}
 	
 	@Override

@@ -3,8 +3,8 @@ package hgm.gef.app;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.awt.Rectangle;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -16,7 +16,10 @@ import hgm.gef.canvas.CanvasPanel;
 import hgm.gef.canvas.CoordSystem;
 import hgm.gef.canvas.ScreenCoordSystem;
 import hgm.gef.fig.Bounds;
+import hgm.gef.fig.RectangleFig;
 import hgm.gef.fig.ShapeFig;
+import hgm.gef.function.PropertyApplier;
+import hgm.gef.function.PropertyApplierBuilder;
 import hgm.gef.layer.AxisLayer;
 import hgm.gef.layer.BasicLayer;
 import hgm.gef.layer.LayerManager;
@@ -24,18 +27,22 @@ import hgm.gef.layer.LayerManager;
 public class App {
 	
 	public static CanvasPanel createCanvasPanel(CoordSystem coordSystem) {
-		ShapeFig fig1 = new ShapeFig(new Rectangle(0, 0, 200, 200));
-		ShapeFig fig2 = new ShapeFig(new Rectangle(200, 200, 200, 200));
-		ShapeFig fig3 = new ShapeFig(new Rectangle(-200, -200, 200, 200));
-		ShapeFig fig4 = new ShapeFig(new Rectangle(-400, -400, 200, 200));
+//		ShapeFig fig1 = new ShapeFig(new Rectangle(0, 0, 200, 200));
+//		ShapeFig fig2 = new ShapeFig(new Rectangle(200, 200, 200, 200));
+//		ShapeFig fig3 = new ShapeFig(new Rectangle(-200, -200, 200, 200));
+//		ShapeFig fig4 = new ShapeFig(new Rectangle(-400, -400, 200, 200));
+		RectangleFig fig5 = new RectangleFig(0, 0, 100, 100);
+		RectangleFig fig6 = new RectangleFig(190, 190, 200, 200);
 		
 		ShapeFig xLine = new ShapeFig(new Line2D.Double(0, 0, 500, 0));
 		ShapeFig yLine = new ShapeFig(new Line2D.Double(0, 0, 0, 500));
 		
-		fig1.setStyle(new BasicStyle(null, Color.RED));
-		fig2.setStyle(new BasicStyle(null, Color.GREEN));
-		fig3.setStyle(new BasicStyle(null, Color.BLUE));
-		fig4.setStyle(new BasicStyle(null, Color.ORANGE));
+//		fig1.setStyle(new BasicStyle(null, Color.RED));
+//		fig2.setStyle(new BasicStyle(null, Color.GREEN));
+//		fig3.setStyle(new BasicStyle(null, Color.BLUE));
+//		fig4.setStyle(new BasicStyle(null, Color.ORANGE));
+		fig5.setStyle(new BasicStyle(null, Color.BLUE));
+		fig6.setStyle(new BasicStyle(null, Color.ORANGE));
 		
 		xLine.setStyle(BasicStyle.dashedLine(false, Color.MAGENTA));
 		yLine.setStyle(BasicStyle.dashedLine(false, Color.CYAN));
@@ -45,14 +52,39 @@ public class App {
 		
 		layer.addFigure(xLine);
 		layer.addFigure(yLine);
-		layer.addFigure(fig1);
-		layer.addFigure(fig2);
-		layer.addFigure(fig3);
-		layer.addFigure(fig4);
+//		layer.addFigure(fig1);
+//		layer.addFigure(fig2);
+//		layer.addFigure(fig3);
+//		layer.addFigure(fig4);
+		layer.addFigure(fig5);
+		layer.addFigure(fig6);
 		
 		Canvas canvas = new Canvas(coordSystem);
-		canvas.setBounds(new Bounds(-400, -400, 400, 400));
+		canvas.setBounds(new Bounds(-100, -100, 100, 100));
 //		canvas.centerOnOrigin();
+
+		canvas.getPropertySupplier(Double.class, Canvas.LEFT);
+		
+//		PropertyApplier<Double, Double> xApplier = PropertyApplierBuilder
+//			.from(fig5, RectangleFig.X2, Double.class)
+//			.via(d -> d+20)
+//			.to(fig6, RectangleFig.X1);
+		
+//		PropertyApplier<Double, Double> yApplier = PropertyApplierBuilder
+//				.from(fig5, RectangleFig.Y2, Double.class)
+//				.via(d -> d+10)
+//				.to(fig6, RectangleFig.Y1);
+		
+		PropertyApplierBuilder
+			.from(canvas, Canvas.MOUSE_POSITION, Point2D.class)
+			.via(p -> p)
+			.via(canvas.pointScreenToModel())
+			.to(fig5, RectangleFig.POINT1).toPropertyLink();
+		
+		PropertyApplierBuilder
+			.from(fig5, RectangleFig.POINT1, Point2D.class)
+			.via(p -> new Point2D.Double(p.getX() - canvas.wScreenToModel(10), p.getY() - 10))
+			.to(fig5, RectangleFig.POINT2).toPropertyLink();
 		
 		LayerManager layerManager = canvas.getLayerManager();
 		layerManager.addToTop(layer);

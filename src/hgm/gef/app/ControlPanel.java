@@ -19,8 +19,10 @@ import hgm.gef.canvas.Canvas;
 import hgm.gef.canvas.CanvasListener;
 import hgm.gef.canvas.CanvasPanel;
 import hgm.gef.fig.Bounds;
+import hgm.gef.property.PropertyListener;
+import hgm.gef.property.PropertyOwner;
 
-public class ControlPanel extends JPanel implements CanvasListener, MouseMotionListener {
+public class ControlPanel extends JPanel implements CanvasListener, PropertyListener, MouseMotionListener {
 	
 	/***/
 	private static final long serialVersionUID = 1L;
@@ -181,11 +183,6 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 	}
 
 	@Override
-	public void zoomChanged(Canvas source) {
-		refreshZoom();
-	}
-
-	@Override
 	public void visibleBoundsChanged(Canvas source) {
 	}
 
@@ -216,6 +213,14 @@ public class ControlPanel extends JPanel implements CanvasListener, MouseMotionL
 	public void offsetChanged(Canvas canvas, double dx, double dy) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void propertyChanged(PropertyOwner owner, String name) {
+		switch (name) {
+		case Canvas.ZOOM: refreshZoom(); break;
+		default: break;
+		}
 	}
 
 }

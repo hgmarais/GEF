@@ -5,32 +5,16 @@ import java.awt.Color;
 import hgm.gef.BasicStyle;
 import hgm.gef.Style;
 import hgm.gef.canvas.Painter;
-import hgm.gef.fig.Bounds;
 import hgm.gef.fig.Fig;
 
-public class DefaultSelectable implements Selectable {
+public class DefaultSelectable extends AbstractSelectable {
 	
 	public static final Style STYLE = BasicStyle.dashedLine(false, Color.BLUE);
 	
-	private SelectionManager selectionManager;
-	
-	private Fig figure;
-
 	public DefaultSelectable(SelectionManager selectionManager, Fig figure) {
-		this.selectionManager = selectionManager;
-		this.figure = figure;
+		super(selectionManager, figure);
 	}
 	
-	@Override
-	public SelectionManager getSelectionManager() {
-		return selectionManager;
-	}
-	
-	@Override
-	public Fig getFigure() {
-		return figure;
-	}
-
 	@Override
 	public void paint(Painter p) {
 		p.pushStyle(STYLE);
@@ -41,16 +25,6 @@ public class DefaultSelectable implements Selectable {
 	@Override
 	public Selection createSelection() {
 		return new DefaultSelection(selectionManager, figure);
-	}
-
-	@Override
-	public boolean contains(double mx, double my) {
-		return figure.contains(mx, my);
-	}
-
-	@Override
-	public Bounds getBounds() {
-		return figure.getBounds();
 	}
 
 }

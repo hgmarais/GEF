@@ -6,6 +6,7 @@ import java.util.List;
 import hgm.gef.canvas.Canvas;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
+import hgm.gef.property.PropertyListener;
 import hgm.gef.util.GEFUtil;
 
 public abstract class AbstractLayer implements Layer {
@@ -13,6 +14,8 @@ public abstract class AbstractLayer implements Layer {
 	private LayerManager layerManager;
 	
 	private LinkedList<LayerListener> listeners = new LinkedList<>();
+	
+	private LinkedList<PropertyListener> propertyListeners = new LinkedList<>();
 
 	@Override
 	public void setLayerManager(LayerManager layerManager) {
@@ -88,6 +91,11 @@ public abstract class AbstractLayer implements Layer {
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public List<PropertyListener> getPropertyListeners() {
+		return propertyListeners;
 	}
 
 }

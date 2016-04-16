@@ -1,18 +1,34 @@
 package hgm.gef.canvas;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 import hgm.gef.Style;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
 import hgm.gef.layer.Layer;
 import hgm.gef.layer.LayerManager;
+import hgm.gef.property.PropertyListener;
+import hgm.gef.property.PropertyOwner;
 import hgm.gef.selection.SelectionManager;
 
-public class Canvas {
+public class Canvas implements PropertyOwner {
+	
+	public static final String ZOOM = "ZOOM";
+	
+	public static final String SCREEN_WIDTH = "SWIDTH";
+	
+	public static final String SCREEN_HEIGHT = "SHEIGHT";
+	
+	public static final String LEFT = "LEFT";
+	
+	public static final String TOP = "TOP";
+	
+	public static final String MOUSE_POSITION = "MOUSE_POSITION";
 	
 	private LayerManager layerManager;
 	
@@ -38,9 +54,13 @@ public class Canvas {
 	
 	private boolean applyingBehaviours = false;
 	
+	private Point mousePosition;
+	
 	private List<Behaviour> behaviours = new LinkedList<>();
 	
 	private LinkedList<CanvasListener> listeners = new LinkedList<>();
+	
+	private LinkedList<PropertyListener> propertyListeners = new LinkedList<>();
 	
 	public Canvas(CoordSystem coordSystem) {
 		this.coordSystem = coordSystem;
@@ -100,6 +120,15 @@ public class Canvas {
 		mCanvasBounds = mBounds;
 		fireCanvasBoundsChanged();
 		applyBehaviours();
+	}
+	
+	public void setMousePosition(Point mousePosition) {
+		this.mousePosition = mousePosition;
+		firePropertyChanged(MOUSE_POSITION);
+	}
+	
+	public Point getMousePosition() {
+		return mousePosition;
 	}
 	
 	public void setScreenSize(int sWidth, int sHeight) {
@@ -216,21 +245,20 @@ public class Canvas {
 		mLeft = mx;
 		mTop = my;
 		
+		firePropertyChanged(LEFT);
+		firePropertyChanged(TOP);
 		fireOffsetChanged(dx, dy);
 		fireVisibleBoundsChanged();
 		applyBehaviours();
 	}
 	
 	public void setZoom(double zoom) {
-		System.out.println("setZoom : "+zoom+" "+getVisibleBounds());
-		
 		if (this.zoom == zoom) {
 			return;
 		}
 		
 		if (zoom > 0.0) {
-			this.zoom = zoom;
-			fireZoomChanged();
+			setProperty(ZOOM, zoom);
 			applyBehaviours();
 		}
 	}
@@ -337,11 +365,11 @@ public class Canvas {
 		}
 	}
 	
-	private void fireZoomChanged() {
-		for (CanvasListener listener : cloneListeners()) {
-			listener.zoomChanged(this);
-		}
-	}
+//	private void fireZoomChanged() {
+//		for (CanvasListener listener : cloneListeners()) {
+//			listener.zoomChanged(this);
+//		}
+//	}
 	
 	private void fireOffsetChanged(double dx, double dy) {
 		for (CanvasListener listener : cloneListeners()) {
@@ -428,6 +456,64 @@ public class Canvas {
 	
 	public void layerRemoved(Layer layer) {
 		applyBehaviours();		
+	}
+
+	@Override
+	public void setProperty(String name, Object value) {
+		switch (name) {
+		case ZOOM:
+			zoom = ((Number) value).doubleValue();
+			break;
+		case LEFT:
+			mLeft = ((Number) value).doubleValue();
+			fireCanvasBoundsChanged();
+			break;
+		case TOP:
+			mTop = ((Number) value).doubleValue();
+			fireCanvasBoundsChanged();
+			break;
+		case SCREEN_WIDTH:
+			sWidth = ((Number) value).intValue();
+			fireVisibleBoundsChanged();
+			break;
+		case SCREEN_HEIGHT:
+			sHeight = ((Number) value).intValue();
+			fireVisibleBoundsChanged();
+			break;
+//		case MOUSE_POSITION:
+		default: break;
+		}
+		
+		firePropertyChanged(name);
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		switch (name) {
+		case ZOOM: return zoom;
+		case LEFT: return mLeft;
+		case TOP: return mTop;
+		case SCREEN_WIDTH: return sWidth;
+		case SCREEN_HEIGHT: return sHeight;
+		case MOUSE_POSITION: return mousePosition;
+		default: break;
+		}
+		
+		return null;
+	}
+
+	@Override
+	public List<PropertyListener> getPropertyListeners() {
+		return propertyListeners;
+	}
+
+	public Function<Point2D, Point2D> pointScreenToModel() {
+		return (s) -> {
+			if (s == null) {
+				return null;
+			}
+			return new Point2D.Double(xScreenToModel(s.getX()), yScreenToModel(s.getY())); 
+		};
 	}
 
 }

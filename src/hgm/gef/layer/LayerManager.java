@@ -11,6 +11,7 @@ import hgm.gef.canvas.Painter;
 import hgm.gef.fig.Bounded;
 import hgm.gef.fig.Bounds;
 import hgm.gef.fig.LayerFig;
+import hgm.gef.property.PropertyListener;
 import hgm.gef.util.GEFUtil;
 
 public class LayerManager implements Bounded, Paintable {
@@ -20,6 +21,8 @@ public class LayerManager implements Bounded, Paintable {
 	private List<Layer> layers = new ArrayList<>();
 	
 	private LinkedList<LayerManagerListener> listeners = new LinkedList<>();
+	
+	private LinkedList<PropertyListener> propertyListeners = new LinkedList<>();
 
 	public LayerManager(Canvas canvas) {
 		this.canvas = canvas;
@@ -129,6 +132,11 @@ public class LayerManager implements Bounded, Paintable {
 	
 	public void figureRemoved(Layer layer, LayerFig figure) {
 		canvas.figureRemoved(layer, figure);
+	}
+
+	@Override
+	public List<PropertyListener> getPropertyListeners() {
+		return propertyListeners;
 	}
 
 }

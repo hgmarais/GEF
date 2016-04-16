@@ -16,7 +16,7 @@ public class AxisLayer extends AbstractLayer {
 	private Axis axis;
 	
 	private BasicStyle style;
-
+	
 	public AxisLayer(Axis axis) {
 		this.axis = axis;
 		style = BasicStyle.line(false, Color.BLACK);

@@ -24,8 +24,10 @@ import hgm.gef.Style;
 import hgm.gef.fig.Bounds;
 import hgm.gef.layer.Layer;
 import hgm.gef.layer.LayerManagerListener;
+import hgm.gef.property.PropertyListener;
+import hgm.gef.property.PropertyOwner;
 
-public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener {
+public class CanvasPanel extends JPanel implements CanvasListener, PropertyListener, LayerManagerListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener {
 	
 	/***/
 	private static final long serialVersionUID = 1L;
@@ -83,6 +85,7 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 		layoutComponents();
 		
 		canvas.addListener(this);
+		canvas.addPropertyListener(this);
 		canvas.getLayerManager().addListener(this);
 		addComponentListener(this);
 		setBackground(Color.WHITE);
@@ -216,6 +219,7 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 //		}
 		
 		canvas.setScreenSize(w, h);
+		repaint();
 	}
 	
 	public void setStyle(Style style) {
@@ -262,6 +266,7 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		canvas.setMousePosition(e.getPoint());
 	}
 
 	@Override
@@ -323,6 +328,7 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		canvas.setMousePosition(e.getPoint());
 		refreshSelectables(e.getX(), e.getY());
 	}
 	
@@ -372,12 +378,6 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	}
 
 	@Override
-	public void zoomChanged(Canvas source) {
-		refreshVisibleSize();
-		repaint();
-	}
-	
-	@Override
 	public void componentShown(ComponentEvent e) {
 		refreshVisibleSize();
 		refreshScrollBars();
@@ -401,6 +401,16 @@ public class CanvasPanel extends JPanel implements CanvasListener, LayerManagerL
 	public void offsetChanged(Canvas canvas, double dx, double dy) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void propertyChanged(PropertyOwner owner, String name) {
+		switch (name) {
+		case Canvas.ZOOM:
+			refreshVisibleSize();
+			break;
+		default: break;
+		}
 	}
 
 }

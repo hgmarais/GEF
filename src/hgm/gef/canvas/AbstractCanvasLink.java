@@ -1,8 +1,10 @@
 package hgm.gef.canvas;
 
 import hgm.gef.fig.Bounds;
+import hgm.gef.property.PropertyListener;
+import hgm.gef.property.PropertyOwner;
 
-public abstract class AbstractCanvasLink implements CanvasLink, CanvasListener {
+public abstract class AbstractCanvasLink implements CanvasLink, CanvasListener, PropertyListener {
 	
 	private boolean applying = false;
 
@@ -38,10 +40,6 @@ public abstract class AbstractCanvasLink implements CanvasLink, CanvasListener {
 	}
 
 	@Override
-	public void zoomChanged(Canvas source) {
-	}
-	
-	@Override
 	public void offsetChanged(Canvas canvas, double dx, double dy) {
 	}
 
@@ -59,6 +57,10 @@ public abstract class AbstractCanvasLink implements CanvasLink, CanvasListener {
 
 	@Override
 	public void converterChanged(Canvas source ) {
+	}
+	
+	@Override
+	public void propertyChanged(PropertyOwner owner, String name) {
 	}
 
 }

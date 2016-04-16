@@ -2,7 +2,7 @@ package hgm.gef.fig;
 
 import hgm.gef.layer.Layer;
 
-public abstract class LayerFig extends BaseFig {
+public abstract class LayerFig extends AbstractFig {
 	
 	private Layer layer;
 

@@ -6,7 +6,7 @@ public interface CanvasListener {
 	
 	void boundsChanged(Canvas source);
 
-	void zoomChanged(Canvas source);
+//	void zoomChanged(Canvas source);
 
 	void visibleBoundsChanged(Canvas source);
 
